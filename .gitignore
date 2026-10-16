@@ -1,0 +1,7 @@
+# Rust
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# systemy
+.DS_Store
+*.log

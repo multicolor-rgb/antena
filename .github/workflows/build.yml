@@ -1,0 +1,78 @@
+# Buduje Antenę na Linuksa (deb + AppImage) i Windows (instalator .exe, NSIS).
+#
+# Uruchomienie:
+#   - ręcznie: zakładka "Actions" -> "build" -> "Run workflow"
+#   - automatycznie po wypchnięciu tagu, np. `git tag v1.0.0 && git push --tags`
+#
+# Gotowe pliki znajdziesz w podsumowaniu uruchomienia, w sekcji "Artifacts".
+#
+# Projekt nie używa npm/node_modules — "npm" pojawia się tylko po to, żeby pobrać
+# gotowe CLI Tauri (npx). Nie trzeba nic instalować lokalnie na Linuksie/Windowsie.
+#
+# (Chcesz też macOS? Dopisz do macierzy poniżej:
+#    - name: macOS (dmg)
+#      os: macos-latest
+#      artifacts: src-tauri/target/release/bundle/dmg/*.dmg
+# )
+
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux (deb + AppImage)
+            os: ubuntu-22.04
+            artifacts: |
+              src-tauri/target/release/bundle/deb/*.deb
+              src-tauri/target/release/bundle/appimage/*.AppImage
+
+          - name: Windows (instalator .exe)
+            os: windows-latest
+            artifacts: |
+              src-tauri/target/release/bundle/nsis/*.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Zależności systemowe (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev build-essential curl wget file \
+            libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - name: Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache (cargo)
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      # Cele bundli bierze z tauri.conf.json ("targets"):
+      #   Linux  -> deb + appimage
+      #   Windows -> nsis
+      - name: Build
+        run: npx --yes @tauri-apps/cli@^2 build
+
+      - name: Wgraj artefakty
+        uses: actions/upload-artifact@v4
+        with:
+          name: antena-${{ matrix.os }}
+          path: ${{ matrix.artifacts }}
+          if-no-files-found: error

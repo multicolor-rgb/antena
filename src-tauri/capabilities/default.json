@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimalny zestaw uprawnień - aplikacja nie potrzebuje niczego więcej.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

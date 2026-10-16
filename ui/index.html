@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Antena · radio internetowe</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="bar">
+        <button id="play" class="round" type="button" aria-label="Odtwórz lub zatrzymaj">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path id="playIcon" d="M8 5v14l11-7z" /></svg>
+        </button>
+
+        <div class="now">
+          <div id="title" class="title" title="">Antena</div>
+          <div id="sub" class="sub">wybierz stację z listy poniżej</div>
+        </div>
+
+        <div class="eq" id="eq" aria-hidden="true"><i></i><i></i><i></i></div>
+
+        <div class="vol">
+          <button id="mute" class="mini" type="button" aria-label="Wycisz">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h3l4-4v14l-4-4H4z" /></svg>
+          </button>
+          <input id="volume" type="range" min="0" max="100" step="1" value="80" aria-label="Głośność" />
+        </div>
+      </header>
+
+      <div class="tools">
+        <input id="search" type="search" placeholder="Szukaj stacji, gatunku, kraju…  ( / )" autocomplete="off" spellcheck="false" />
+        <div id="chips" class="chips"></div>
+      </div>
+
+      <main class="list-wrap">
+        <ul id="list" class="list"></ul>
+        <p id="empty" class="empty" hidden>Nic nie znaleziono.</p>
+      </main>
+
+      <footer class="status">
+        <span id="state">Zatrzymane</span>
+        <span id="count" class="dim"></span>
+      </footer>
+    </div>
+
+    <script src="stations.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
