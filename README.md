@@ -64,8 +64,9 @@ Windowsa można zbudować cross-toolchainem z Linuksa (`cargo-xwin` + LLVM +
 NSIS), ale prościej i bez lokalnych zależności zrobi to GitHub Actions:
 workflow `.github/workflows/build.yml` buduje `deb` + AppImage na Linuksie oraz
 `.exe` na Windowsie. Uruchomienie: zakładka **Actions → build → Run workflow**
-(albo po wypchnięciu tagu: `git tag v1.0.0 && git push --tags`). Gotowe pliki
-pojawiają się w sekcji **Artifacts** danego uruchomienia.
+(pliki pojawią się w sekcji **Artifacts** danego uruchomienia). Jeśli chcesz je
+mieć w **Release**, wypchnij tag: `git tag v1.0.0 && git push --tags` — workflow
+zbuduje paczki i utworzy release `v1.0.0`, dołączając pliki do sekcji **Assets**.
 
 macOS trzeba zbudować na macOS (Apple nie udostępnia swojego toolchainu na
 Linuksa); wystarczy dopisać jedną pozycję do macierzy w workflow — komentarz w
