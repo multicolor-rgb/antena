@@ -3,7 +3,8 @@
 #
 # Uruchomienie:
 #   - ręcznie:  zakładka "Actions" -> "build" -> "Run workflow"
-#               (buduje i wystawia pliki jako artefakty, bez release)
+#               (buduje i wystawia pliki jako artefakty; wpisz tag w polu
+#                "release_tag", aby dodatkowo utworzyć Release)
 #   - z tagiem: git tag v1.0.0 && git push --tags
 #               (buduje + tworzy release "v1.0.0" z plikami w "Assets")
 #
@@ -20,6 +21,11 @@ name: build
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Tag dla Release (np. v1.0.0). Zostaw puste, jeśli chcesz tylko artefakty."
+        required: false
+        type: string
   push:
     tags:
       - "v*"
@@ -83,7 +89,9 @@ jobs:
   release:
     name: Release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/')
+    # Release powstaje, gdy: (a) workflow ruszył z tagu, LUB
+    # (b) uruchomiono ręcznie i podano "release_tag".
+    if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -100,6 +108,7 @@ jobs:
       - name: Utwórz / zaktualizuj release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
           files: dist/**/*
           generate_release_notes: true
           # draft: true   # odkomentuj, jeśli chcesz najpierw przejrzeć release
