@@ -1,0 +1,2815 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Antena · lekkie radio internetowe na Windows i Linux</title>
+<meta name="description" content="Antena to radio internetowe, które nie pożera komputera: 252 stacje, 30 gatunków, ulubione, tytuł grającego utworu. Binarka 3,3 MB, zero frameworków, ~4% CPU. Windows i Linux." />
+<meta name="theme-color" content="#0b0d11" />
+
+<!-- ============ Podgląd linku (Open Graph + karta X/Twitter) ============
+     Adresy muszą być bezwzględne — dlatego wpisany jest docelowy adres strony.
+     Zmieniasz domenę? Podmień ją w pięciu miejscach: canonical, og:url,
+     og:image, og:image:secure_url i twitter:image. Plik og.jpg leży obok
+     index.html i musi zostać wgrany razem z nim. -->
+<link rel="canonical" href="https://multicolor-rgb.github.io/antena/" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Antena" />
+<meta property="og:locale" content="pl_PL" />
+<meta property="og:url" content="https://multicolor-rgb.github.io/antena/" />
+<meta property="og:title" content="Antena · lekkie radio internetowe na Windows i Linux" />
+<meta property="og:description" content="252 stacje, 30 gatunków, ulubione i tytuł grającego utworu — w jednym oknie 440×680 px. Binarka 3,3 MB, zero frameworków, ~4% CPU. Windows 10/11 i Linux." />
+<meta property="og:image" content="https://multicolor-rgb.github.io/antena/og.jpg" />
+<meta property="og:image:secure_url" content="https://multicolor-rgb.github.io/antena/og.jpg" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Okno aplikacji Antena z listą stacji radiowych, obok napis: Cała muzyka. Zero zbędnych bajtów." />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Antena · lekkie radio internetowe na Windows i Linux" />
+<meta name="twitter:description" content="252 stacje, 30 gatunków, ulubione i tytuł grającego utworu — w jednym oknie 440×680 px. Binarka 3,3 MB, zero frameworków, ~4% CPU. Windows 10/11 i Linux." />
+<meta name="twitter:image" content="https://multicolor-rgb.github.io/antena/og.jpg" />
+<meta name="twitter:image:alt" content="Okno aplikacji Antena z listą stacji radiowych, obok napis: Cała muzyka. Zero zbędnych bajtów." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23f0b441'/%3E%3Cg fill='none' stroke='%2315181d' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M16 16v9'/%3E%3Cpath d='M11 25h10'/%3E%3Cpath d='M9.5 9.5a9 9 0 0 0 0 9'/%3E%3Cpath d='M22.5 9.5a9 9 0 0 1 0 9'/%3E%3C/g%3E%3Ccircle cx='16' cy='13' r='3' fill='%2315181d'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- Czcionki ładowane bez blokowania pierwszego malowania (mniej czekania na słabym łączu).
+     Wagi ograniczone do tych, których strona naprawdę używa. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" /></noscript>
+
+<script>
+/* =========================================================================
+   TRYB WYDAJNOŚCI — wybierany zanim cokolwiek się namaluje.
+   lite = słabe komputery / telefony / tryb oszczędzania danych,
+   mid  = przeciętne maszyny, high = mocne. Ten sam wygląd, mniej efektów
+   kosztownych dla GPU. Wynik pomiaru z poprzedniej wizyty jest pamiętany
+   i może tylko obniżyć tryb (nigdy nie udajemy, że słaba maszyna jest mocna).
+   ========================================================================= */
+(function () {
+  var d = document.documentElement;
+  d.classList.add("js");
+
+  var RANK = { lite: 0, mid: 1, high: 2 };
+  var t = "high";
+  function lower(x) { if (RANK[x] < RANK[t]) t = x; }
+
+  var mem  = navigator.deviceMemory || 0;
+  var cpu  = navigator.hardwareConcurrency || 0;
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection || {};
+  var coarse = matchMedia("(pointer:coarse)").matches;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (mem && mem <= 2) lower("lite"); else if (mem && mem <= 4) lower("mid");
+  if (cpu && cpu <= 2) lower("lite"); else if (cpu && cpu <= 4) lower("mid");
+  if (coarse || d.clientWidth < 760) lower("mid");
+  if (conn.saveData || /(^|-)2g$|3g$|slow/.test(conn.effectiveType || "")) lower("mid");
+  if (!window.requestAnimationFrame || !("IntersectionObserver" in window) ||
+      !window.CSS || !(CSS.supports("backdrop-filter", "blur(2px)") || CSS.supports("-webkit-backdrop-filter", "blur(2px)"))) lower("lite");
+  if (reduce) lower("lite");
+
+  var saved = null, savedTs = 0;
+  try {
+    saved = localStorage.getItem("antena-perf");
+    savedTs = parseInt(localStorage.getItem("antena-perf-ts") || "0", 10) || 0;
+  } catch (e) {}
+  /* zapisany pomiar pamiętamy 14 dni — mógł dotyczyć chwilowo obciążonej maszyny */
+  if (saved && RANK[saved] !== undefined && RANK[saved] < RANK[t] &&
+      Date.now() - savedTs < 14 * 864e5) t = saved;
+
+  /* ręczne wymuszenie trybu: ?perf=lite|mid|high (przydatne do sprawdzenia wyglądu) */
+  var forced = /[?&]perf=(lite|mid|high)/.exec(location.search);
+  if (forced) t = forced[1];
+
+  window.ANTENA_PERF = {
+    tier: t, rank: RANK, reduce: reduce, coarse: coarse,
+    dpr:      t === "lite" ? 1 : t === "mid" ? 1.5 : 2,
+    bars:     t === "lite" ? 22 : t === "mid" ? 36 : 52,
+    layers:   t === "lite" ? 2 : 3,
+    canvasFps: t === "lite" ? 24 : 60,
+    mqFps:    t === "lite" ? 30 : 60,
+    split:    t !== "lite",
+    cursor:   t !== "lite",
+    smooth:   t !== "lite",
+    tilt:     t !== "lite",
+    magnet:   t === "high",
+    parallax: t !== "lite"
+  };
+  d.classList.add("perf-" + t);
+  if (window.console && console.info) {
+    console.info("[Antena] tryb wydajności: " + t +
+      " (rdzenie: " + (cpu || "?") + ", RAM: " + (mem || "?") + " GB, dotyk: " + coarse + ")");
+  }
+})();
+</script>
+
+<style>
+/* =========================================================================
+   ANTENA — strona promująca (edycja „awards").
+   Jeden plik: HTML + CSS + JS. Zero zależności, zero frameworków.
+   Paleta wprost z aplikacji: grafit + bursztyn. Wszystko na transform/opacity.
+   ========================================================================= */
+
+:root{
+  --bg:#0b0d11;
+  --bg2:#111419;
+  --bg3:#171b22;
+  --line:#242932;
+  --line2:#313846;
+  --fg:#eceef2;
+  --dim:#8f97a6;
+  --dim2:#6b7382;
+  --acc:#f0b441;
+  --acc-soft:#f0b44122;
+  --acc-2:#ff8a3d;
+  --cool:#63b3ed;
+  --violet:#8b7cf6;
+  --bad:#e2604a;
+  --ok:#5cc98b;
+
+  --radius:18px;
+  --radius-sm:12px;
+  --radius-lg:28px;
+  --shadow:0 24px 60px -20px rgba(0,0,0,.75);
+  --font:"Inter", system-ui, "Segoe UI", Cantarell, sans-serif;
+  --display:"Space Grotesk", "Inter", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --pad:clamp(18px, 4vw, 40px);
+  --maxw:1240px;
+  --ease:cubic-bezier(.22,.75,.24,1);
+  --ease-out:cubic-bezier(.16,1,.3,1);   /* „expo out" — ruch w duchu awards */
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;overflow-x:hidden}
+html:focus-within{scroll-behavior:smooth}
+html.has-smooth,html.has-smooth:focus-within{scroll-behavior:auto}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.65 var(--font);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+/* ziarno + winieta: „filmowy" podkład */
+body::before{
+  content:"";position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 1.2s steps(6) infinite
+}
+@keyframes grain{
+  0%{transform:translate3d(0,0,0)}20%{transform:translate3d(-3%,2%,0)}40%{transform:translate3d(2%,-3%,0)}
+  60%{transform:translate3d(-2%,-2%,0)}80%{transform:translate3d(3%,1%,0)}100%{transform:translate3d(0,0,0)}
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:9997;pointer-events:none;
+  background:radial-gradient(ellipse 120% 80% at 50% 0%,transparent 55%,rgba(0,0,0,.55));
+}
+html.pl-lock,html.pl-lock body{overflow:hidden}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+h1,h2,h3,h4{font-family:var(--display);font-weight:700;line-height:1.04;letter-spacing:-.025em;margin:0}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+::selection{background:var(--acc);color:#0b0d11}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:6px}
+
+/* =========================== PRELOADER =========================== */
+#preloader{
+  position:fixed;inset:0;z-index:10001;background:#08090c;
+  display:grid;place-items:center;gap:0;
+  clip-path:inset(0 0 0 0);
+  transition:clip-path 1.05s var(--ease-out),opacity .5s ease .85s
+}
+#preloader.done{clip-path:inset(0 0 100% 0);opacity:0;pointer-events:none}
+.pl-in{width:min(420px,78vw);text-align:center}
+.pl-mark{
+  width:74px;height:74px;margin:0 auto 26px;border-radius:22px;display:grid;place-items:center;
+  background:linear-gradient(145deg,var(--acc),var(--acc-2));color:#15181d;
+  box-shadow:0 30px 60px -26px rgba(240,180,65,.9);
+  animation:plPop .9s var(--ease-out) both
+}
+.pl-mark svg{width:40px;height:40px}
+@keyframes plPop{from{opacity:0;transform:scale(.5) rotate(-14deg)}to{opacity:1;transform:none}}
+.pl-name{font:700 22px/1 var(--display);letter-spacing:-.02em}
+.pl-name small{display:block;font:500 10.5px/1 var(--mono);letter-spacing:.28em;color:var(--dim2);margin-top:8px;text-transform:uppercase}
+.dial{position:relative;height:56px;margin:30px 0 8px;display:flex;align-items:center;justify-content:center;gap:5px}
+.dial i{width:3px;height:10px;border-radius:2px;background:var(--bg3);animation:plBars 1.15s ease-in-out infinite}
+@keyframes plBars{0%,100%{height:8px;background:var(--bg3)}50%{height:38px;background:var(--acc)}}
+.pl-row{display:flex;justify-content:space-between;font:500 11.5px/1 var(--mono);color:var(--dim2);letter-spacing:.08em;margin-top:14px}
+.pl-count{color:var(--acc)}
+.pl-track{height:2px;background:var(--bg3);margin-top:10px;overflow:hidden}
+.pl-track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--acc-2));transition:width .25s linear}
+.pl-skip{position:fixed;right:22px;bottom:20px;font:500 11px/1 var(--mono);color:var(--dim2);letter-spacing:.14em}
+
+/* =========================== KURSOR ===========================
+   Świadomie powściągliwy: cienki pierścień + precyzyjna kropka.
+   Bez trybu „difference" (inwersja koloru pod kursorem), bez rozdmuchanych
+   etykiet zasłaniających treść — kursor ma towarzyszyć, a nie dominować. */
+.cur,.cur-dot{position:fixed;top:0;left:0;z-index:10000;pointer-events:none;border-radius:50%;opacity:0;transition:opacity .4s ease}
+.cur{
+  width:26px;height:26px;margin:-13px 0 0 -13px;
+  border:1px solid rgba(236,238,242,.32);
+  background:rgba(236,238,242,.03);
+  transition:width .3s var(--ease-out),height .3s var(--ease-out),margin .3s var(--ease-out),
+             opacity .4s ease,background .35s ease,border-color .35s ease
+}
+.cur.hover{width:38px;height:38px;margin:-19px 0 0 -19px;border-color:rgba(240,180,65,.6);background:rgba(240,180,65,.07)}
+.cur-dot{width:4px;height:4px;margin:-2px 0 0 -2px;background:var(--acc);opacity:0}
+html.cur-on,html.cur-on *{cursor:none!important}
+html.cur-on .cur,html.cur-on .cur-dot{opacity:1}
+
+/* =========================== NAWIGACJA =========================== */
+#progress{
+  position:fixed;top:0;left:0;height:2px;width:0;z-index:1000;transform-origin:0 50%;
+  background:linear-gradient(90deg,var(--acc),var(--acc-2) 55%,var(--violet));
+  box-shadow:0 0 22px rgba(240,180,65,.75)
+}
+header.nav{
+  position:sticky;top:0;z-index:900;
+  backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);
+  background:rgba(11,13,17,.6);border-bottom:1px solid transparent;
+  transition:border-color .4s,background .4s,transform .5s var(--ease-out)
+}
+header.nav.stuck{border-bottom-color:var(--line);background:rgba(11,13,17,.86)}
+header.nav.hide{transform:translateY(-100%)}
+.nav-in{display:flex;align-items:center;gap:18px;height:74px;max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
+.brand{display:flex;align-items:center;gap:12px;font:700 19px/1 var(--display);letter-spacing:-.02em}
+.brand .mark{
+  width:36px;height:36px;border-radius:12px;display:grid;place-items:center;position:relative;overflow:hidden;
+  background:linear-gradient(145deg,var(--acc),var(--acc-2));color:#15181d;
+  box-shadow:0 10px 26px -12px rgba(240,180,65,.9)
+}
+.brand .mark svg{width:21px;height:21px;position:relative;z-index:1}
+.brand:hover .mark svg{animation:wobble .6s var(--ease)}
+@keyframes wobble{0%,100%{transform:none}30%{transform:rotate(-12deg) scale(1.08)}70%{transform:rotate(8deg)}}
+.brand small{display:block;font:500 10px/1 var(--mono);color:var(--dim2);letter-spacing:.18em;margin-top:5px;text-transform:uppercase}
+.nav-cta{display:flex;align-items:center;gap:10px;margin-left:auto}
+.btn{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:13px 22px;border:0;border-radius:999px;cursor:pointer;overflow:hidden;
+  font-weight:650;font-size:14.5px;white-space:nowrap;
+  transition:transform .25s var(--ease-out),box-shadow .3s,background .3s,color .2s
+}
+.btn svg{width:17px;height:17px;flex:none;position:relative;z-index:1}
+.btn span{position:relative;z-index:1}
+.btn::before{
+  content:"";position:absolute;inset:0;transform:translateX(-101%);
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);
+  transition:transform .7s var(--ease-out)
+}
+.btn:hover::before{transform:translateX(101%)}
+.btn-primary{background:linear-gradient(145deg,var(--acc),#e79f24);color:#15181d;box-shadow:0 16px 38px -16px rgba(240,180,65,.9)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 26px 54px -18px rgba(240,180,65,1)}
+.btn-ghost{background:var(--bg3);color:var(--fg);border:1px solid var(--line)}
+.btn-ghost:hover{background:#1f242d;border-color:var(--line2);transform:translateY(-3px)}
+.btn-kofi{background:#ff5f5f;color:#fff;box-shadow:0 16px 38px -18px rgba(255,95,95,.95)}
+.btn-kofi:hover{transform:translateY(-3px)}
+.btn-sm{padding:11px 18px;font-size:13.5px}
+.burger{
+  display:inline-flex;align-items:center;gap:11px;height:44px;padding:0 18px 0 16px;border-radius:999px;
+  background:var(--bg3);border:1px solid var(--line);cursor:pointer;color:var(--fg);
+  font:600 13px/1 var(--font);letter-spacing:.02em;
+  transition:background .3s,border-color .3s,transform .3s var(--ease-out)
+}
+.burger:hover{background:#1f242d;border-color:var(--line2)}
+.burger i{position:relative;display:block;width:17px;height:10px;flex:none}
+.burger i::before,.burger i::after{
+  content:"";position:absolute;left:0;height:1.6px;border-radius:2px;background:currentColor;
+  transition:transform .45s var(--ease-out),width .45s var(--ease-out)
+}
+.burger i::before{top:0;width:17px}
+.burger i::after{bottom:0;width:11px}
+.burger:hover i::after{width:17px}
+
+/* =========================== MENU PEŁNOEKRANOWE =========================== */
+.menu{
+  position:fixed;inset:0;z-index:1200;display:flex;flex-direction:column;
+  background:#0a0c10;overflow:hidden;
+  clip-path:inset(0 0 100% 0);visibility:hidden;
+  transition:clip-path .85s var(--ease-out),visibility 0s linear .85s
+}
+.menu.open{clip-path:inset(0 0 0 0);visibility:visible;transition:clip-path .85s var(--ease-out),visibility 0s}
+html.menu-open{overflow:hidden;padding-right:var(--sbw,0)}
+.menu-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.menu-bg::before{
+  content:"";position:absolute;inset:0;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:78px 78px;
+  mask-image:radial-gradient(ellipse 74% 66% at 22% 30%,#000,transparent 74%);
+  -webkit-mask-image:radial-gradient(ellipse 74% 66% at 22% 30%,#000,transparent 74%)
+}
+.menu-blob{position:absolute;border-radius:50%;filter:blur(110px);opacity:.5}
+.menu-blob.m1{width:46vw;height:46vw;left:-12vw;top:-14vw;background:radial-gradient(circle,rgba(240,180,65,.55),transparent 68%)}
+.menu-blob.m2{width:40vw;height:40vw;right:-10vw;bottom:-16vw;background:radial-gradient(circle,rgba(139,124,246,.42),transparent 68%)}
+.menu-top{
+  position:relative;z-index:1;display:flex;align-items:center;gap:18px;height:74px;flex:none;
+  max-width:var(--maxw);width:100%;margin:0 auto;padding:0 var(--pad)
+}
+.menu-top .brand{margin-right:auto}
+.menu-close{
+  width:44px;height:44px;border-radius:999px;background:var(--bg3);border:1px solid var(--line);
+  display:grid;place-items:center;cursor:pointer;color:var(--fg);
+  transition:background .3s,border-color .3s,transform .45s var(--ease-out)
+}
+.menu-close:hover{background:#1f242d;border-color:var(--line2);transform:rotate(90deg)}
+.menu-close svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}
+.menu-body{
+  position:relative;z-index:1;flex:1;min-height:0;width:100%;max-width:var(--maxw);margin:0 auto;
+  display:grid;grid-template-columns:1.35fr .65fr;gap:clamp(28px,5vw,80px);
+  align-items:center;padding:clamp(12px,3vh,40px) var(--pad) clamp(30px,7vh,64px);overflow-y:auto
+}
+/* na niskich ekranach treść może być wyższa od okna — wtedy wyrównujemy do góry,
+   żeby przewijanie nie ucinało pierwszego elementu */
+@media (max-height:720px){
+  .menu-body{align-items:start;align-content:start}
+}
+.menu-list{display:flex;flex-direction:column;gap:clamp(0px,.8vh,8px)}
+.menu-link{
+  position:relative;display:flex;align-items:baseline;gap:clamp(14px,2vw,28px);padding:clamp(4px,1vh,12px) 0;
+  font-family:var(--display);font-weight:700;letter-spacing:-.03em;line-height:1.04;
+  font-size:clamp(32px,6.2vw,72px);color:var(--dim);
+  transition:color .4s var(--ease-out)
+}
+.menu-num{font:500 11px/1 var(--mono);letter-spacing:.16em;color:var(--dim2);transform:translateY(-.4em);transition:color .4s}
+.menu-txt{position:relative;display:block;overflow:hidden;padding-bottom:.14em;margin-bottom:-.14em}
+.menu-txt i{position:relative;display:block;font-style:normal;transition:transform .55s var(--ease-out)}
+.menu-txt i::after{content:attr(data-t);position:absolute;left:0;top:100%;color:var(--acc)}
+.menu-go{
+  margin-left:auto;font-size:.36em;color:var(--acc);opacity:0;transform:translateX(-12px);
+  transition:opacity .4s,transform .5s var(--ease-out)
+}
+.menu-link:hover,.menu-link.active{color:var(--fg)}
+.menu-link:hover .menu-num,.menu-link.active .menu-num{color:var(--acc)}
+.menu-link:hover .menu-txt i{transform:translateY(-100%)}
+.menu-link:hover .menu-go{opacity:1;transform:none}
+.menu-side{display:flex;flex-direction:column;gap:clamp(20px,3.4vh,36px);font-size:14.5px}
+.menu-label{font:500 10.5px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--dim2);margin-bottom:14px}
+.menu-side .menu-actions{display:flex;flex-direction:column;gap:10px}
+.menu-side a:not(.btn){display:inline-flex;align-items:center;gap:9px;color:var(--dim);padding:5px 0;transition:color .3s,transform .35s var(--ease-out)}
+.menu-side a:not(.btn):hover{color:var(--fg);transform:translateX(5px)}
+.menu-side a:not(.btn) svg{width:15px;height:15px;flex:none}
+.menu-foot{font:500 11px/1.7 var(--mono);color:var(--dim2);letter-spacing:.04em;border-top:1px solid var(--line);padding-top:16px}
+.menu.open .menu-link{animation:menuIn .8s var(--ease-out) both;animation-delay:calc(.2s + var(--i,0) * .07s)}
+.menu.open .menu-side{animation:menuIn .7s var(--ease-out) both;animation-delay:.5s}
+@keyframes menuIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.menu-link{opacity:0}
+.menu-side{opacity:0}
+
+/* =========================== UKŁAD =========================== */
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 var(--pad);position:relative;z-index:1}
+section{position:relative;padding:clamp(70px,10vw,140px) 0}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:12px;font:600 12px/1 var(--font);
+  letter-spacing:.18em;text-transform:uppercase;color:var(--acc);margin-bottom:20px
+}
+.eyebrow em{font:500 11px/1 var(--mono);color:var(--dim2);font-style:normal;letter-spacing:.1em}
+.eyebrow::before{content:"";width:30px;height:1px;background:linear-gradient(90deg,var(--acc),transparent)}
+.h2{font-size:clamp(31px,4.8vw,58px)}
+.lead{color:var(--dim);font-size:clamp(16px,1.6vw,18.5px);max-width:62ch;margin-top:18px}
+.grad{
+  background:linear-gradient(100deg,var(--acc) 5%,var(--acc-2) 45%,#ffd68a 95%);
+  -webkit-background-clip:text;background-clip:text;color:transparent
+}
+.grad .w-i{
+  background-image:linear-gradient(100deg,var(--acc) 5%,var(--acc-2) 45%,#ffd68a 95%);
+  -webkit-background-clip:text;background-clip:text;color:transparent
+}
+.grad.is-split{background:none}
+.beam{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent)}
+
+/* =========================== SPLIT TEXT =========================== */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.14em;margin-bottom:-.14em}
+.w-i{display:inline-block}
+.js [data-split] .w-i{transform:translateY(118%)}
+.js [data-split].in .w-i{transform:translateY(0);transition:transform 1.05s var(--ease-out)}
+
+/* =========================== HERO =========================== */
+.hero{padding-top:clamp(40px,6vw,90px);overflow:hidden}
+#waveCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.85;pointer-events:none}
+.aurora{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:.55;will-change:transform}
+.blob.a{width:48vw;height:48vw;left:-10vw;top:-16vw;background:radial-gradient(circle,rgba(240,180,65,.6),transparent 66%)}
+.blob.b{width:42vw;height:42vw;right:-8vw;top:-8vw;background:radial-gradient(circle,rgba(255,138,61,.45),transparent 66%)}
+.blob.c{width:40vw;height:40vw;left:24vw;top:16vw;background:radial-gradient(circle,rgba(139,124,246,.36),transparent 66%)}
+.grid-lines{
+  position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.55;
+  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:70px 70px;
+  mask-image:radial-gradient(ellipse 82% 62% at 50% 8%,#000,transparent 76%);
+  -webkit-mask-image:radial-gradient(ellipse 82% 62% at 50% 8%,#000,transparent 76%)
+}
+.spot{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.4;
+  background:radial-gradient(460px circle at var(--mx,50%) var(--my,30%),rgba(240,180,65,.09),transparent 65%)}
+.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(28px,5vw,60px);align-items:center}
+.hero-grid > *{min-width:0}
+.badge{
+  display:inline-flex;align-items:center;gap:10px;padding:8px 16px 8px 10px;border:1px solid var(--line);
+  border-radius:999px;background:rgba(23,27,34,.7);font-size:12.5px;color:var(--dim);margin-bottom:26px;
+  backdrop-filter:blur(8px)
+}
+.badge b{color:var(--fg);font-weight:650}
+.pip{width:7px;height:7px;border-radius:50%;background:var(--ok);position:relative}
+.pip::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid var(--ok);animation:pip 2.2s var(--ease-out) infinite}
+@keyframes pip{0%{transform:scale(.6);opacity:.9}70%,100%{transform:scale(1.7);opacity:0}}
+.dot-sep{color:var(--dim2)}
+h1.title{font-size:clamp(40px,6.8vw,80px);letter-spacing:-.04em;line-height:.98}
+.hero p.lead{margin-top:24px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:36px}
+.platform-pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.pill{
+  display:inline-flex;align-items:center;gap:9px;padding:9px 15px;border-radius:999px;
+  background:var(--bg2);border:1px solid var(--line);font-size:13px;color:var(--dim);
+  transition:transform .3s var(--ease-out),border-color .3s,color .3s
+}
+.pill:hover{transform:translateY(-3px);border-color:var(--line2);color:var(--fg)}
+.pill svg{width:15px;height:15px}
+.mini-stats{display:flex;flex-wrap:wrap;gap:28px;margin-top:40px;padding-top:28px;border-top:1px solid var(--line)}
+.mini-stats div strong{display:flex;align-items:baseline;font:700 26px/1 var(--display);letter-spacing:-.02em}
+.mini-stats div > span{font-size:12.5px;color:var(--dim)}
+.scroll-cue{display:inline-flex;align-items:center;gap:12px;margin-top:36px;font:500 11px/1 var(--mono);letter-spacing:.22em;color:var(--dim2);text-transform:uppercase}
+.scroll-cue i{width:1px;height:38px;background:linear-gradient(180deg,var(--acc),transparent);position:relative;overflow:hidden}
+.scroll-cue i::after{content:"";position:absolute;left:0;top:0;width:1px;height:40%;background:var(--fg);animation:cue 1.8s var(--ease) infinite}
+@keyframes cue{0%{transform:translateY(-100%)}100%{transform:translateY(250%)}}
+
+/* =========================== MAKIETA APLIKACJI =========================== */
+.mock-shell{position:relative;min-width:0;perspective:1400px}
+.mock-shell::after{
+  content:"";position:absolute;inset:-16% -12% -20%;z-index:-1;border-radius:50%;
+  background:radial-gradient(ellipse at 50% 42%,rgba(240,180,65,.2),transparent 70%)
+}
+.mock-stage{transform-style:preserve-3d;will-change:transform}
+.mock{
+  width:100%;max-width:440px;margin:0 auto;height:680px;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--bg);border:1px solid var(--line2);border-radius:22px;
+  box-shadow:var(--shadow),0 0 0 1px rgba(255,255,255,.04) inset;
+  user-select:none;position:relative
+}
+.mock::after{
+  content:"";position:absolute;inset:0;border-radius:22px;pointer-events:none;
+  background:linear-gradient(115deg,rgba(255,255,255,.09),transparent 42%)
+}
+.mock-bar{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--bg2);border-bottom:1px solid var(--line);flex:none}
+.mock-play{
+  flex:none;width:42px;height:42px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;
+  background:var(--acc);color:#15181d;position:relative;transition:transform .2s var(--ease-out)
+}
+.mock-play::after{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid var(--acc);animation:pip 2s var(--ease-out) infinite}
+.mock-play:hover{transform:scale(1.06)}
+.mock-play:active{transform:scale(.94)}
+.mock-play svg{width:20px;height:20px;fill:currentColor}
+.mock-now{min-width:0;flex:1}
+.mock-now .t{font-size:13.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mock-now .t.dead{color:var(--bad)}
+.mock-now .s{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eq{display:flex;align-items:flex-end;gap:2px;height:16px;flex:none;opacity:.35;transition:opacity .3s}
+.eq.on{opacity:1}
+.eq i{display:block;width:3px;border-radius:2px;background:var(--acc);height:5px}
+.eq.on i{animation:bounce .9s infinite ease-in-out}
+.eq.on i:nth-child(2){animation-delay:.18s}
+.eq.on i:nth-child(3){animation-delay:.36s}
+@keyframes bounce{0%,100%{height:5px}50%{height:16px}}
+.mock-vol{display:flex;align-items:center;gap:8px;flex:none;width:106px}
+.mock-vol button{width:28px;height:28px;border-radius:8px;border:0;background:var(--bg3);cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.mock-vol button:hover{background:#232935}
+.mock-vol button svg{width:16px;height:16px;fill:var(--dim);transition:fill .2s}
+.mock-vol button:hover svg{fill:var(--fg)}
+.mock-vol button.muted svg{fill:var(--bad)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:3px;background:var(--line2);cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px rgba(240,180,65,.18)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--acc)}
+.mock-tools{padding:10px 12px;border-bottom:1px solid var(--line);flex:none}
+.mock-search{
+  width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg3);
+  font-size:13px;outline:none;transition:border-color .25s,box-shadow .25s
+}
+.mock-search:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(240,180,65,.12)}
+.mock-search::placeholder{color:var(--dim2)}
+.mock-chips{display:flex;gap:6px;margin-top:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.mock-chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:none;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg3);
+  font-size:12px;font-weight:500;color:var(--dim);cursor:pointer;white-space:nowrap;
+  transition:transform .25s var(--ease-out),color .2s,border-color .2s,background .25s
+}
+.chip:hover{color:var(--fg);border-color:var(--line2);transform:translateY(-2px)}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#15181d;font-weight:650}
+.mock-list{flex:1;overflow:auto;padding:4px 0;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.mock-list::-webkit-scrollbar{width:8px}
+.mock-list::-webkit-scrollbar-thumb{background:var(--line2);border-radius:8px}
+.row{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-left:2px solid transparent;transition:background .2s,border-color .2s}
+.row:hover{background:var(--bg2)}
+.row.playing{background:#1d2027;border-left-color:var(--acc)}
+.row-tog{flex:none;width:9px;height:9px;border-radius:50%;background:var(--line2);position:relative}
+.row.playing .row-tog{background:var(--acc);box-shadow:0 0 0 4px rgba(240,180,65,.16)}
+.row-name{flex:1;min-width:0;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.dead .row-name{color:var(--bad)}
+.row-meta{flex:none;font-size:11.5px;color:var(--dim2);font-family:var(--mono);max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.star{flex:none;width:22px;height:22px;border:0;background:none;cursor:pointer;padding:2px;transition:transform .25s var(--ease-out)}
+.star:hover{transform:scale(1.2)}
+.star svg{fill:none;stroke:var(--dim2);stroke-width:1.8}
+.star.on svg{fill:var(--acc);stroke:var(--acc)}
+.mock-status{
+  display:flex;justify-content:space-between;gap:10px;padding:9px 14px;background:var(--bg2);
+  border-top:1px solid var(--line);font-size:11.5px;color:var(--dim);flex:none;overflow:hidden
+}
+.mock-status .left{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.mock-status .err{color:var(--bad)}
+.mock-hint{
+  position:relative;z-index:1;text-align:center;font-size:12.5px;color:var(--dim);
+  margin:26px auto 0;max-width:var(--maxw);padding:0 var(--pad)
+}
+.mock-hint kbd{
+  font:500 11px/1 var(--mono);background:var(--bg3);border:1px solid var(--line);border-radius:5px;
+  padding:3px 6px;color:var(--dim);display:inline-block
+}
+
+/* =========================== MARQUEE / BAND =========================== */
+.ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg2);padding:18px 0;overflow:hidden;position:relative}
+.ticker::before,.ticker::after{content:"";position:absolute;top:0;bottom:0;width:130px;z-index:2;pointer-events:none}
+.ticker::before{left:0;background:linear-gradient(90deg,var(--bg2),transparent)}
+.ticker::after{right:0;background:linear-gradient(270deg,var(--bg2),transparent)}
+.mq{display:flex;white-space:nowrap;will-change:transform}
+.mq > span{display:inline-flex;align-items:center;gap:34px;padding-right:34px;font-size:14px;color:var(--dim)}
+.mq > span i{width:5px;height:5px;border-radius:50%;background:var(--acc);opacity:.75;flex:none}
+.band{padding:clamp(40px,7vw,90px) 0;overflow:hidden}
+.band-line{display:flex;white-space:nowrap;will-change:transform;align-items:center;gap:clamp(26px,4vw,60px)}
+.band-line b{
+  font:700 clamp(40px,8.5vw,120px)/1 var(--display);letter-spacing:-.04em;
+  color:transparent;-webkit-text-stroke:1px rgba(236,238,242,.28);white-space:nowrap
+}
+.band-line b.fill{
+  -webkit-text-stroke:0;
+  background:linear-gradient(100deg,var(--acc),var(--acc-2));-webkit-background-clip:text;background-clip:text
+}
+.band-line s{width:14px;height:14px;border-radius:50%;background:var(--acc);flex:none;text-decoration:none}
+
+/* =========================== BENTO / FUNKCJE =========================== */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:56px}
+.card{
+  position:relative;overflow:hidden;padding:28px;border-radius:var(--radius);
+  background:linear-gradient(180deg,var(--bg2),var(--bg));border:1px solid var(--line);
+  transform:translateY(0);
+  transition:transform .5s var(--ease-out),border-color .4s,box-shadow .5s
+}
+.card::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:conic-gradient(from calc(var(--p,0)*1turn),rgba(240,180,65,.85),transparent 22%,transparent 78%,rgba(240,180,65,.85));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;opacity:0;transition:opacity .4s
+}
+.card:hover::before{opacity:.45}
+.card::after{
+  content:"";position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,0%),rgba(240,180,65,.07),transparent 62%)
+}
+.card:hover{transform:translateY(-4px);border-color:var(--line2);box-shadow:0 30px 54px -34px rgba(0,0,0,.85)}
+.card:hover::after{opacity:1}
+.card .ico{
+  width:46px;height:46px;border-radius:14px;display:grid;place-items:center;margin-bottom:20px;
+  background:var(--acc-soft);border:1px solid rgba(240,180,65,.28);color:var(--acc);
+  transition:transform .5s var(--ease-out),background .4s
+}
+.card:hover .ico{transform:rotate(-4deg) scale(1.04)}
+.card .ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.card h3{font-size:18.5px;margin-bottom:10px}
+.card p{font-size:14.5px;color:var(--dim)}
+.card .tag{display:inline-block;margin-top:16px;font:500 11px/1 var(--mono);color:var(--acc);background:var(--acc-soft);border:1px solid rgba(240,180,65,.2);border-radius:999px;padding:5px 10px}
+.c-3{grid-column:span 3}
+.c-2{grid-column:span 2}
+.card.hi{background:linear-gradient(150deg,rgba(240,180,65,.1),var(--bg2) 58%);border-color:rgba(240,180,65,.3)}
+
+/* =========================== LICZNIKI =========================== */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-top:60px}
+.stat{background:var(--bg2);padding:34px 24px;text-align:center;transition:background .4s}
+.stat:hover{background:#151a21}
+.stat b{display:flex;justify-content:center;align-items:baseline;font:700 clamp(34px,5vw,52px)/1 var(--display);letter-spacing:-.03em}
+.stat b .u{font-size:.46em;color:var(--acc);margin-left:4px}
+.stat > span{display:block;margin-top:10px;font-size:13px;color:var(--dim)}
+.o-digit{display:inline-block;height:1em;overflow:hidden}
+.o-strip{display:flex;flex-direction:column;transition:transform 1.6s var(--ease-out)}
+.o-strip i{height:1em;line-height:1;font-style:normal}
+
+/* =========================== INTERFEJS =========================== */
+.shot{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(28px,5vw,64px);align-items:center;margin-top:56px}
+.shot-fig{margin:0}
+.shot-fig figcaption{
+  margin-top:16px;text-align:center;font-size:12.5px;color:var(--dim);letter-spacing:.01em
+}
+.shot-frame{
+  position:relative;padding:14px;border-radius:26px;background:linear-gradient(160deg,var(--bg3),var(--bg2));
+  border:1px solid var(--line2);box-shadow:var(--shadow);max-width:440px;margin:0 auto;will-change:transform
+}
+.shot-frame img{border-radius:14px;width:100%}
+.shot-frame::after{content:"";position:absolute;inset:-16% -18%;z-index:-1;border-radius:50%;background:radial-gradient(ellipse,rgba(240,180,65,.17),transparent 68%)}
+.checklist{display:grid;gap:20px}
+.checklist li{display:flex;gap:15px;transition:transform .5s var(--ease-out)}
+.checklist li:hover{transform:translateX(8px)}
+.checklist .ico{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--bg3);border:1px solid var(--line);color:var(--acc)}
+.checklist .ico svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.checklist h4{font-size:16.5px;margin-bottom:5px}
+.checklist p{font-size:14.5px;color:var(--dim)}
+
+/* =========================== PLATFORMY =========================== */
+.platforms{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:56px}
+.pf{
+  position:relative;padding:36px;border-radius:var(--radius-lg);border:1px solid var(--line);overflow:hidden;
+  background:linear-gradient(170deg,var(--bg2),var(--bg) 70%);
+  transition:transform .6s var(--ease-out),border-color .4s
+}
+.pf:hover{border-color:var(--line2)}
+.pf::before{content:"";position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(240,180,65,.16),transparent 70%);transition:transform .8s var(--ease-out)}
+.pf:hover::before{transform:scale(1.12)}
+.pf .glyph{display:grid;place-items:center;width:54px;height:54px;color:var(--fg);margin-bottom:22px;transition:transform .6s var(--ease-out)}
+.pf:hover .glyph{transform:translateY(-3px) rotate(-3deg)}
+.pf .glyph svg{width:100%;height:100%}
+.pf h3{font-size:26px;margin-bottom:12px}
+.pf p{color:var(--dim);font-size:15px}
+.pf ul{margin:24px 0 28px;display:grid;gap:11px}
+.pf li{display:flex;gap:11px;font-size:14.5px;color:var(--dim)}
+.pf li svg{width:17px;height:17px;flex:none;margin-top:4px;stroke:var(--acc);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.pf .files{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.file{font:500 12px/1 var(--mono);padding:7px 11px;border-radius:8px;background:var(--bg3);border:1px solid var(--line);color:var(--dim)}
+.note{margin-top:18px;font-size:13px;color:var(--dim)}
+.note code{font:500 12px/1 var(--mono);background:var(--bg3);padding:3px 6px;border-radius:5px;color:var(--acc)}
+
+/* =========================== INSTALACJA =========================== */
+.install{margin-top:52px;border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg2)}
+.tabs{position:relative;display:flex;gap:4px;padding:10px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;background:rgba(11,13,17,.5)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;position:relative;z-index:1;padding:11px 17px;border:0;border-radius:10px;background:transparent;cursor:pointer;font-size:14px;font-weight:550;color:var(--dim);transition:color .3s}
+.tab:hover{color:var(--fg)}
+.tab[aria-selected="true"]{color:#15181d;font-weight:650}
+.tab-pill{
+  position:absolute;top:10px;left:0;height:calc(100% - 20px);border-radius:10px;background:var(--acc);
+  transition:transform .5s var(--ease-out),width .5s var(--ease-out);z-index:0
+}
+.panels{padding:28px}
+.panel{display:none}
+.panel.on{display:block;animation:fade .5s var(--ease-out)}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.panel h4{font-size:19.5px;margin-bottom:8px}
+.panel > p{color:var(--dim);font-size:14.5px;margin-bottom:18px}
+.cmd{position:relative;display:flex;align-items:flex-start;gap:14px;background:#0a0c10;border:1px solid var(--line);border-radius:var(--radius-sm);padding:16px 58px 16px 16px;margin-bottom:12px;overflow:auto;transition:border-color .3s}
+.cmd:hover{border-color:var(--line2)}
+.cmd pre{margin:0;font:400 13px/1.7 var(--mono);color:#dfe4ec;white-space:pre}
+.cmd pre .cm{color:var(--dim2)}
+.cmd pre .fl{color:var(--acc)}
+.copy{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:10px;cursor:pointer;background:var(--bg3);border:1px solid var(--line);display:grid;place-items:center;transition:background .2s,transform .25s var(--ease-out)}
+.copy:hover{background:#232935;transform:translateY(-2px)}
+.copy svg{width:15px;height:15px;stroke:var(--dim);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.copy.done svg{stroke:var(--ok)}
+.steps{display:grid;gap:14px;margin-top:24px}
+.step{display:flex;gap:15px;align-items:flex-start}
+.step b{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--acc-soft);border:1px solid rgba(240,180,65,.28);color:var(--acc);font:650 12px/1 var(--mono)}
+.step p{font-size:14.5px;color:var(--dim)}
+.step p strong{color:var(--fg);font-weight:600}
+
+/* =========================== WYDAJNOŚĆ =========================== */
+.perf{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:56px}
+.panelbox{padding:32px;border-radius:var(--radius);background:var(--bg2);border:1px solid var(--line)}
+.panelbox h3{font-size:20px;margin-bottom:6px}
+.panelbox .sub{font-size:14px;color:var(--dim);margin-bottom:28px}
+.bar{margin-bottom:24px}
+.bar-top{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:10px}
+.bar-top b{font-family:var(--mono);font-weight:500}
+.bar-track{height:10px;border-radius:999px;background:var(--bg3);overflow:hidden}
+.bar-fill{height:100%;width:0;border-radius:999px;transition:width 1.7s var(--ease-out)}
+.bar-fill.bad{background:linear-gradient(90deg,#e2604a,#ff8a3d)}
+.bar-fill.good{background:linear-gradient(90deg,var(--acc),#5cc98b)}
+.mem{margin-top:8px;padding-top:24px;border-top:1px solid var(--line);display:grid;gap:13px}
+.mem div{display:flex;justify-content:space-between;font-size:14px;color:var(--dim);transition:color .3s,transform .4s var(--ease-out)}
+.mem div:hover{color:var(--fg);transform:translateX(6px)}
+.mem div b{font-family:var(--mono);font-weight:500;color:var(--fg)}
+.tiny{font-size:12.5px;color:var(--dim);margin-top:20px}
+
+/* =========================== SKRÓTY =========================== */
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:52px}
+.key{
+  display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:var(--radius-sm);
+  background:var(--bg2);border:1px solid var(--line);
+  transition:transform .4s var(--ease-out),border-color .3s,box-shadow .4s
+}
+.key:hover{border-color:rgba(240,180,65,.4);transform:translateY(-4px)}
+kbd{
+  flex:none;min-width:46px;text-align:center;padding:11px 12px;border-radius:10px;font:500 13px/1 var(--mono);color:var(--fg);
+  background:linear-gradient(180deg,#1f242c,#151920);border:1px solid var(--line2);
+  box-shadow:0 2px 0 #0a0c10,0 8px 16px -10px rgba(0,0,0,.9);
+  transition:transform .16s var(--ease-out),background .2s,color .2s,border-color .2s
+}
+.key.flash{border-color:var(--acc);box-shadow:0 0 0 1px rgba(240,180,65,.35),0 24px 40px -26px rgba(240,180,65,.8)}
+.key.flash kbd{background:var(--acc);color:#15181d;border-color:var(--acc);transform:translateY(3px) scale(.97)}
+.key span{font-size:14.5px;color:var(--dim)}
+
+/* =========================== FAQ =========================== */
+.faq{margin-top:50px;display:grid;gap:12px}
+details{border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--bg2);overflow:hidden;transition:border-color .4s,background .4s}
+details[open],details:hover{border-color:var(--line2)}
+details[open]{border-color:rgba(240,180,65,.34)}
+summary{display:flex;align-items:center;gap:14px;padding:22px;cursor:pointer;list-style:none;font-family:var(--display);font-size:17px;font-weight:600}
+summary::-webkit-details-marker{display:none}
+summary .plus{flex:none;margin-left:auto;width:24px;height:24px;position:relative;border:1px solid var(--line2);border-radius:50%}
+summary .plus::before,summary .plus::after{content:"";position:absolute;background:var(--acc);border-radius:2px;transition:transform .45s var(--ease-out)}
+summary .plus::before{left:6px;top:11px;width:10px;height:1.8px}
+summary .plus::after{left:10.6px;top:6.4px;width:1.8px;height:10px}
+details[open] summary .plus::after{transform:rotate(90deg) scaleY(0)}
+details .body{padding:0 22px 22px;color:var(--dim);font-size:14.5px}
+details .body code{font:500 12.5px/1 var(--mono);background:var(--bg3);padding:3px 6px;border-radius:5px;color:var(--acc)}
+
+/* =========================== WSPARCIE =========================== */
+.support{
+  position:relative;overflow:hidden;border-radius:var(--radius-lg);padding:clamp(34px,5vw,68px);
+  border:1px solid rgba(255,95,95,.3);
+  background:linear-gradient(140deg,rgba(255,95,95,.17),var(--bg2) 58%)
+}
+.support::before{
+  content:"";position:absolute;inset:-2px;border-radius:inherit;pointer-events:none;
+  background:conic-gradient(from var(--spin,0deg),transparent 55%,rgba(240,180,65,.8),transparent 78%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;padding:1px;
+  animation:spin 6s linear infinite;animation-play-state:paused
+}
+/* obracająca się obwódka rusza tylko wtedy, gdy sekcja wsparcia jest na ekranie */
+.support.on::before{animation-play-state:running}
+@keyframes spin{to{--spin:360deg}}
+@property --spin{syntax:"<angle>";inherits:false;initial-value:0deg}
+.support::after{content:"";position:absolute;right:-80px;bottom:-100px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(240,180,65,.24),transparent 70%)}
+.support-in{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:36px;align-items:center}
+.support h2{font-size:clamp(28px,4.3vw,46px)}
+.support p{color:var(--dim);margin-top:16px;max-width:52ch}
+.support .actions{display:flex;flex-wrap:wrap;gap:12px}
+
+/* =========================== STOPKA =========================== */
+footer{border-top:1px solid var(--line);padding:70px 0 46px;background:var(--bg2);position:relative;overflow:hidden}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px}
+.foot-grid h5{font:600 12px/1 var(--font);letter-spacing:.16em;text-transform:uppercase;color:var(--dim2);margin-bottom:18px}
+.foot-grid ul{display:grid;gap:11px}
+.foot-grid a{position:relative;font-size:14.5px;color:var(--dim);transition:color .25s}
+.foot-grid a::after{content:"";position:absolute;left:0;bottom:-2px;width:100%;height:1px;background:var(--acc);transform:scaleX(0);transform-origin:0 50%;transition:transform .4s var(--ease-out)}
+.foot-grid a:hover{color:var(--acc)}
+.foot-grid a:hover::after{transform:scaleX(1)}
+.foot-bottom{margin-top:50px;padding-top:26px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;font-size:13.5px;color:var(--dim)}
+.giant{
+  font:700 clamp(70px,19vw,260px)/.8 var(--display);letter-spacing:-.06em;color:transparent;
+  -webkit-text-stroke:1px rgba(236,238,242,.14);text-align:center;margin-top:60px;user-select:none;will-change:transform
+}
+
+/* =========================== RÓŻNE =========================== */
+#toast{
+  position:fixed;left:50%;bottom:30px;transform:translate(-50%,180%);z-index:1200;
+  padding:14px 22px;border-radius:999px;background:var(--fg);color:#0b0d11;font-size:14px;font-weight:600;
+  box-shadow:0 24px 50px -20px rgba(0,0,0,.95);opacity:0;pointer-events:none;
+  transition:transform .55s var(--ease-out),opacity .35s
+}
+#toast.show{transform:translate(-50%,0);opacity:1}
+#toTop{
+  position:fixed;right:22px;bottom:24px;z-index:950;width:48px;height:48px;border-radius:50%;
+  background:var(--bg3);border:1px solid var(--line2);cursor:pointer;display:grid;place-items:center;
+  opacity:0;transform:translateY(20px) scale(.9);pointer-events:none;
+  transition:opacity .4s,transform .5s var(--ease-out),background .3s
+}
+#toTop.on{opacity:1;transform:none;pointer-events:auto}
+#toTop:hover{background:var(--acc)}
+#toTop svg{width:18px;height:18px;stroke:var(--fg);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#toTop:hover svg{stroke:#15181d}
+
+.reveal{transition:opacity .9s var(--ease-out),transform .9s var(--ease-out)}
+.js .reveal{opacity:0;transform:translateY(34px)}
+.js .reveal.in{opacity:1;transform:none}
+.js .reveal[data-split]{opacity:1;transform:none}
+.js .reveal.from-l{transform:translateX(-44px)}
+.js .reveal.from-r{transform:translateX(44px)}
+.js .reveal.from-l.in,.js .reveal.from-r.in{transform:none}
+.js .reveal.zoom{transform:scale(.92)}
+.js .reveal.zoom.in{transform:none}
+
+/* =========================== RESPONSYWNOŚĆ =========================== */
+@media (max-width:1040px){
+  .hero-grid{grid-template-columns:1fr;gap:48px}
+  .bento{grid-template-columns:repeat(4,1fr)}
+  .c-3{grid-column:span 4}
+  .c-2{grid-column:span 2}
+  .shot{grid-template-columns:1fr}
+  .perf{grid-template-columns:1fr}
+  .keys{grid-template-columns:repeat(2,1fr)}
+  .support-in{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:1020px){
+  .menu-body{grid-template-columns:1fr;align-items:start;gap:clamp(30px,5vh,48px);padding-top:clamp(16px,4vh,32px)}
+  .menu-side{flex-direction:row;flex-wrap:wrap;gap:clamp(24px,5vw,48px);border-top:1px solid var(--line);padding-top:clamp(20px,4vh,32px)}
+  .menu-side > div{flex:1 1 200px}
+  .menu-foot{flex:1 1 100%;border-top:0;padding-top:0}
+}
+@media (max-width:860px){
+  .nav-cta .btn-ghost{display:none}
+  .foot-grid{grid-template-columns:1fr;gap:32px}
+}
+@media (max-width:620px){
+  body{font-size:15.5px}
+  .bento{grid-template-columns:1fr}
+  .c-2,.c-3{grid-column:span 1}
+  .platforms{grid-template-columns:1fr}
+  .keys{grid-template-columns:1fr}
+  .mock{height:580px}
+  .mini-stats{gap:20px}
+  .mini-stats div strong{font-size:21px}
+  .nav-cta .btn-sm{padding:11px 15px;font-size:13.5px}
+  .burger{padding:0;width:44px;justify-content:center}
+  .burger-txt{display:none}
+  .menu-num{display:none}
+  .support .actions .btn{width:100%}
+  #toTop{right:14px;bottom:14px}
+  .brand small{display:none}
+}
+@media (pointer:coarse){
+  .cur,.cur-dot{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  .reveal,.js .reveal,.js .reveal[data-split]{opacity:1!important;transform:none!important}
+  .js [data-split] .w-i{transform:none!important}
+  .cur,.cur-dot{display:none}
+  #preloader{display:none}
+  .menu,.menu.open{transition:none;clip-path:none}
+  .menu{display:none}
+  .menu.open{display:flex}
+  html:focus-within{scroll-behavior:auto}
+}
+
+/* =========================================================================
+   TRYBY WYDAJNOŚCI — klasę perf-lite / perf-mid / perf-high ustawia skrypt
+   w <head>, a pomiar płynności może ją obniżyć w locie. Wygląd zostaje ten
+   sam: znikają tylko rzeczy najdroższe dla procesora i karty graficznej.
+   ========================================================================= */
+
+/* ---------- LITE: słabe komputery, telefony, oszczędzanie danych ---------- */
+html.perf-lite body::before{display:none}            /* ziarno = warstwa na cały ekran */
+html.perf-lite .blob{filter:none;opacity:.42}        /* bez rozmycia 100 px na elemencie 48vw */
+html.perf-lite header.nav,
+html.perf-lite header.nav.stuck{
+  backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(11,13,17,.96)
+}
+html.perf-lite .badge{backdrop-filter:none;background:rgba(23,27,34,.92)}
+html.perf-lite .menu-blob{filter:none;opacity:.4}
+html.perf-lite .menu-bg::before{display:none}
+html.perf-lite{--shadow:0 16px 36px -20px rgba(0,0,0,.7)}
+html.perf-lite .spot{display:none}
+html.perf-lite .support::before{animation:none}
+html.perf-lite .mock-play::after{animation:none}
+html.perf-lite .pip::after{animation-duration:2.8s}
+html.perf-lite .scroll-cue i::after{animation-duration:2.4s}
+/* odsłanianie bez przesuwania i bez opóźnień — mniej warstw w ruchu */
+html.perf-lite .reveal{transition-duration:.45s}
+html.perf-lite .js .reveal{transform:none}
+html.perf-lite .js .reveal.from-l,
+html.perf-lite .js .reveal.from-r,
+html.perf-lite .js .reveal.zoom{transform:none}
+html.perf-lite .js .reveal[data-split]{
+  opacity:0;transform:translateY(14px);
+  transition:opacity .5s var(--ease-out),transform .5s var(--ease-out)
+}
+html.perf-lite .js .reveal[data-split].in{opacity:1;transform:none}
+/* preloader bez animowania wysokości 26 słupków */
+html.perf-lite .dial i{height:14px;animation:plGlow 1.15s ease-in-out infinite}
+@keyframes plGlow{0%,100%{background:var(--bg3);opacity:.3}50%{background:var(--acc);opacity:1}}
+
+/* ---------- MID: przeciętne maszyny — lżejsze rozmycia i krótsze przejścia ---------- */
+html.perf-mid .blob{filter:blur(46px)}
+html.perf-mid .reveal{transition-duration:.7s}
+html.perf-mid .pip::after{animation-duration:2.8s}
+
+/* ---------- URZĄDZENIA DOTYKOWE ----------
+   Na telefonach i tabletach rozmycie przyklejonego paska wymaga
+   przemalowania całej jego szerokości w każdej klatce przewijania.
+   Nad ciemną stroną różnica jest niewidoczna, a koszt realny. */
+@media (pointer:coarse){
+  header.nav,header.nav.stuck{
+    backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(11,13,17,.96)
+  }
+  .badge{backdrop-filter:none;background:rgba(23,27,34,.92)}
+  .menu-blob{filter:none;opacity:.4}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= PRELOADER ======================= -->
+<div id="preloader" aria-hidden="true">
+  <div class="pl-in">
+    <span class="pl-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M12 12v9"/><path d="M8 21h8"/><path d="M5.6 5.6a9 9 0 0 0 0 9"/><path d="M18.4 5.6a9 9 0 0 1 0 9"/>
+        <circle cx="12" cy="10" r="2.4" fill="currentColor" stroke="none"/>
+      </svg>
+    </span>
+    <div class="pl-name">Antena<small>radio internetowe</small></div>
+    <div class="dial" id="plDial" aria-hidden="true"></div>
+    <div class="pl-row"><span id="plStatus">STROJENIE ODBIORNIKA</span><span class="pl-count" id="plCount">000</span></div>
+    <div class="pl-track"><i id="plBar"></i></div>
+  </div>
+  <span class="pl-skip">KLIKNIJ, ABY POMINĄĆ</span>
+</div>
+
+<!-- ======================= KURSOR ======================= -->
+<div class="cur" id="cur" aria-hidden="true"></div>
+<div class="cur-dot" id="curDot" aria-hidden="true"></div>
+
+<div id="progress"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<button id="toTop" aria-label="Wróć na górę">
+  <svg viewBox="0 0 24 24"><path d="M12 19V6"/><path d="m6 11 6-6 6 6"/></svg>
+</button>
+
+<!-- ======================= NAWIGACJA ======================= -->
+<header class="nav" id="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top" data-cursor="link" aria-label="Antena — początek">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M12 12v9"/><path d="M8 21h8"/><path d="M5.6 5.6a9 9 0 0 0 0 9"/><path d="M18.4 5.6a9 9 0 0 1 0 9"/>
+          <circle cx="12" cy="10" r="2.4" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span>Antena<small>radio internetowe</small></span>
+    </a>
+
+    <div class="nav-cta">
+      <a class="btn btn-primary btn-sm" href="https://github.com/multicolor-rgb/antena/releases/latest" target="_blank" rel="noopener" data-cursor="link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
+        <span>Pobierz</span>
+      </a>
+      <button class="burger" id="burger" aria-label="Otwórz menu" aria-expanded="false" aria-controls="menu">
+        <i aria-hidden="true"></i><span class="burger-txt">Menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= MENU PEŁNOEKRANOWE ======================= -->
+<div class="menu" id="menu" aria-hidden="true">
+  <div class="menu-bg" aria-hidden="true">
+    <span class="menu-blob m1"></span>
+    <span class="menu-blob m2"></span>
+  </div>
+
+  <div class="menu-top">
+    <a class="brand" href="#top" data-cursor="link" aria-label="Antena — początek">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M12 12v9"/><path d="M8 21h8"/><path d="M5.6 5.6a9 9 0 0 0 0 9"/><path d="M18.4 5.6a9 9 0 0 1 0 9"/>
+          <circle cx="12" cy="10" r="2.4" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span>Antena<small>radio internetowe</small></span>
+    </a>
+    <button class="menu-close" id="menuClose" aria-label="Zamknij menu">
+      <svg viewBox="0 0 24 24"><path d="M6 6 18 18M18 6 6 18"/></svg>
+    </button>
+  </div>
+
+  <div class="menu-body">
+    <nav class="menu-list" aria-label="Sekcje strony">
+      <a class="menu-link" style="--i:0" href="#funkcje" data-cursor="link"><span class="menu-num">01</span><span class="menu-txt"><i data-t="Funkcje">Funkcje</i></span><span class="menu-go" aria-hidden="true">→</span></a>
+      <a class="menu-link" style="--i:1" href="#stacje" data-cursor="link"><span class="menu-num">02</span><span class="menu-txt"><i data-t="Stacje">Stacje</i></span><span class="menu-go" aria-hidden="true">→</span></a>
+      <a class="menu-link" style="--i:2" href="#platformy" data-cursor="link"><span class="menu-num">03</span><span class="menu-txt"><i data-t="Platformy">Platformy</i></span><span class="menu-go" aria-hidden="true">→</span></a>
+      <a class="menu-link" style="--i:3" href="#instalacja" data-cursor="link"><span class="menu-num">04</span><span class="menu-txt"><i data-t="Instalacja">Instalacja</i></span><span class="menu-go" aria-hidden="true">→</span></a>
+      <a class="menu-link" style="--i:4" href="#wydajnosc" data-cursor="link"><span class="menu-num">05</span><span class="menu-txt"><i data-t="Wydajność">Wydajność</i></span><span class="menu-go" aria-hidden="true">→</span></a>
+      <a class="menu-link" style="--i:5" href="#faq" data-cursor="link"><span class="menu-num">06</span><span class="menu-txt"><i data-t="FAQ">FAQ</i></span><span class="menu-go" aria-hidden="true">→</span></a>
+    </nav>
+
+    <aside class="menu-side">
+      <div>
+        <p class="menu-label">Pobierz</p>
+        <div class="menu-actions">
+          <a class="btn btn-primary btn-sm" href="https://github.com/multicolor-rgb/antena/releases/download/1.0.0/Antena_1.0.0_x64-setup.exe" target="_blank" rel="noopener" data-cursor="link"><span>Windows · .exe</span></a>
+          <a class="btn btn-ghost btn-sm" href="#instalacja" data-cursor="link"><span>Linux · .deb / AppImage</span></a>
+        </div>
+      </div>
+      <div>
+        <p class="menu-label">Projekt</p>
+        <a href="https://github.com/multicolor-rgb/antena" target="_blank" rel="noopener" data-cursor="link">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.93-.89-1.18-.89-1.18-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          Repozytorium
+        </a>
+        <a href="https://github.com/multicolor-rgb/antena/releases/latest" target="_blank" rel="noopener" data-cursor="link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
+          Wydania
+        </a>
+        <a href="http://ko-fi.com/multicolorplugins" target="_blank" rel="noopener" data-cursor="link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a3.5 3.5 0 0 1 0 7H17"/><path d="M3 8h14v7a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Z"/><path d="M7 3v2M11 3v2"/></svg>
+          Postaw kawę
+        </a>
+      </div>
+      <p class="menu-foot">v1.0.0 · Rust + Tauri 2<br />3,3 MB · zero frameworków</p>
+    </aside>
+  </div>
+</div>
+
+<!-- ======================= HERO ======================= -->
+<section class="hero" id="top">
+  <canvas id="waveCanvas" aria-hidden="true"></canvas>
+  <div class="aurora" aria-hidden="true">
+    <span class="blob a" data-parallax="0.07"></span>
+    <span class="blob b" data-parallax="-0.06"></span>
+    <span class="blob c" data-parallax="0.035"></span>
+  </div>
+  <div class="grid-lines" aria-hidden="true"></div>
+  <div class="spot" id="heroSpot" aria-hidden="true"></div>
+
+  <div class="wrap hero-grid">
+    <div>
+      <span class="badge">
+        <span class="pip"></span>
+        <b>v1.0.0</b><span class="dot-sep">·</span>Rust + Tauri 2<span class="dot-sep">·</span>bez frameworków
+      </span>
+
+      <h1 class="title reveal" data-split>Cała muzyka.<br /><span class="grad">Zero zbędnych bajtów.</span></h1>
+
+      <p class="lead reveal">
+        Antena to radio internetowe, które nie pożera Twojego komputera. <b>252 stacje</b>, 30 gatunków,
+        ulubione i tytuł aktualnie grającego utworu — w jednym oknie 440×680 px. Bez kont, bez reklam,
+        bez chmury i bez <code style="font:500 13px/1 var(--mono);color:var(--acc)">node_modules</code>.
+      </p>
+
+      <div class="hero-actions reveal">
+        <a class="btn btn-primary" href="https://github.com/multicolor-rgb/antena/releases/download/1.0.0/Antena_1.0.0_x64-setup.exe" target="_blank" rel="noopener" data-cursor="link" data-magnet="0.3">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.6 10.2 4.6v6.5H3V5.6Zm0 12.8 7.2 1v-6.4H3v5.4ZM11.1 4.5 21 3v8.1h-9.9V4.5Zm0 15 9.9 1.4V12.2h-9.9v7.3Z"/></svg>
+          <span>Pobierz dla Windows</span>
+        </a>
+        <a class="btn btn-ghost" href="#instalacja" data-cursor="link" data-magnet="0.25">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139zm.529 3.405h.013c.213 0 .396.062.584.198.19.135.33.332.438.533.105.259.158.459.166.724 0-.02.006-.04.006-.06v.105a.086.086 0 01-.004-.021l-.004-.024a1.807 1.807 0 01-.15.706.953.953 0 01-.213.335.71.71 0 00-.088-.042c-.104-.045-.198-.064-.284-.133a1.312 1.312 0 00-.22-.066c.05-.06.146-.133.183-.198.053-.128.082-.264.088-.402v-.02a1.21 1.21 0 00-.061-.4c-.045-.134-.101-.2-.183-.333-.084-.066-.167-.132-.267-.132h-.016c-.093 0-.176.03-.262.132a.8.8 0 00-.205.334 1.18 1.18 0 00-.09.4v.019c.002.089.008.179.02.267-.193-.067-.438-.135-.607-.202a1.635 1.635 0 01-.018-.2v-.02a1.772 1.772 0 01.15-.768c.082-.22.232-.406.43-.533a.985.985 0 01.594-.2zm-2.962.059h.036c.142 0 .27.048.399.135.146.129.264.288.344.465.09.199.14.4.153.667v.004c.007.134.006.2-.002.266v.08c-.03.007-.056.018-.083.024-.152.055-.274.135-.393.2.012-.09.013-.18.003-.267v-.015c-.012-.133-.04-.2-.082-.333a.613.613 0 00-.166-.267.248.248 0 00-.183-.064h-.021c-.071.006-.13.04-.186.132a.552.552 0 00-.12.27.944.944 0 00-.023.33v.015c.012.135.037.2.08.334.046.134.098.2.166.268.01.009.02.018.034.024-.07.057-.117.07-.176.136a.304.304 0 01-.131.068 2.62 2.62 0 01-.275-.402 1.772 1.772 0 01-.155-.667 1.759 1.759 0 01.08-.668 1.43 1.43 0 01.283-.535c.128-.133.26-.2.418-.2zm1.37 1.706c.332 0 .733.065 1.216.399.293.2.523.269 1.052.468h.003c.255.136.405.266.478.399v-.131a.571.571 0 01.016.47c-.123.31-.516.643-1.063.842v.002c-.268.135-.501.333-.775.465-.276.135-.588.292-1.012.267a1.139 1.139 0 01-.448-.067 3.566 3.566 0 01-.322-.198c-.195-.135-.363-.332-.612-.465v-.005h-.005c-.4-.246-.616-.512-.686-.71-.07-.268-.005-.47.193-.6.224-.135.38-.271.483-.336.104-.074.143-.102.176-.131h.002v-.003c.169-.202.436-.47.839-.601.139-.036.294-.065.466-.065zm2.8 2.142c.358 1.417 1.196 3.475 1.735 4.473.286.534.855 1.659 1.102 3.024.156-.005.33.018.513.064.646-1.671-.546-3.467-1.089-3.966-.22-.2-.232-.335-.123-.335.59.534 1.365 1.572 1.646 2.757.13.535.16 1.104.021 1.67.067.028.135.06.205.067 1.032.534 1.413.938 1.23 1.537v-.043c-.06-.003-.12 0-.18 0h-.016c.151-.467-.182-.825-1.065-1.224-.915-.4-1.646-.336-1.77.465-.008.043-.013.066-.018.135-.068.023-.139.053-.209.064-.43.268-.662.669-.793 1.187-.13.533-.17 1.156-.205 1.869v.003c-.02.334-.17.838-.319 1.35-1.5 1.072-3.58 1.538-5.348.334a2.645 2.645 0 00-.402-.533 1.45 1.45 0 00-.275-.333c.182 0 .338-.03.465-.067a.615.615 0 00.314-.334c.108-.267 0-.697-.345-1.163-.345-.467-.931-.995-1.788-1.521-.63-.4-.986-.87-1.15-1.396-.165-.534-.143-1.085-.015-1.645.245-1.07.873-2.11 1.274-2.763.107-.065.037.135-.408.974-.396.751-1.14 2.497-.122 3.854a8.123 8.123 0 01.647-2.876c.564-1.278 1.743-3.504 1.836-5.268.048.036.217.135.289.202.218.133.38.333.59.465.21.201.477.335.876.335.039.003.075.006.11.006.412 0 .73-.134.997-.268.29-.134.52-.334.74-.4h.005c.467-.135.835-.402 1.044-.7zm2.185 8.958c.037.6.343 1.245.882 1.377.588.134 1.434-.333 1.791-.765l.211-.01c.315-.007.577.01.847.268l.003.003c.208.199.305.53.391.876.085.4.154.78.409 1.066.486.527.645.906.636 1.14l.003-.007v.018l-.003-.012c-.015.262-.185.396-.498.595-.63.401-1.746.712-2.457 1.57-.618.737-1.37 1.14-2.036 1.191-.664.053-1.237-.2-1.574-.898l-.005-.003c-.21-.4-.12-1.025.056-1.69.176-.668.428-1.344.463-1.897.037-.714.076-1.335.195-1.814.12-.465.308-.797.641-.984l.045-.022zm-10.814.049h.01c.053 0 .105.005.157.014.376.055.706.333 1.023.752l.91 1.664.003.003c.243.533.754 1.064 1.189 1.637.434.598.77 1.131.729 1.57v.006c-.057.744-.48 1.148-1.125 1.294-.645.135-1.52.002-2.395-.464-.968-.536-2.118-.469-2.857-.602-.369-.066-.61-.2-.723-.4-.11-.2-.113-.602.123-1.23v-.004l.002-.003c.117-.334.03-.752-.027-1.118-.055-.401-.083-.71.043-.94.16-.334.396-.4.69-.533.294-.135.64-.202.915-.47h.002v-.002c.256-.268.445-.601.668-.838.19-.201.38-.336.663-.336zm7.159-9.074c-.435.201-.945.535-1.488.535-.542 0-.97-.267-1.28-.466-.154-.134-.28-.268-.373-.335-.164-.134-.144-.333-.074-.333.109.016.129.134.199.2.096.066.215.2.36.333.292.2.68.467 1.167.467.485 0 1.053-.267 1.398-.466.195-.135.445-.334.648-.467.156-.136.149-.267.279-.267.128.016.034.134-.147.332a8.097 8.097 0 01-.69.468zm-1.082-1.583V5.64c-.006-.02.013-.042.029-.05.074-.043.18-.027.26.004.063 0 .16.067.15.135-.006.049-.085.066-.135.066-.055 0-.092-.043-.141-.068-.052-.018-.146-.008-.163-.065zm-.551 0c-.02.058-.113.049-.166.066-.047.025-.086.068-.14.068-.05 0-.13-.02-.136-.068-.01-.066.088-.133.15-.133.08-.031.184-.047.259-.005.019.009.036.03.03.05v.02h.003z"/></svg>
+          <span>Instalacja na Linuksa</span>
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/multicolor-rgb/antena" target="_blank" rel="noopener" data-cursor="link" data-magnet="0.25"><span>Kod źródłowy</span></a>
+      </div>
+
+      <div class="platform-pills reveal">
+        <span class="pill">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.6 10.2 4.6v6.5H3V5.6Zm0 12.8 7.2 1v-6.4H3v5.4ZM11.1 4.5 21 3v8.1h-9.9V4.5Zm0 15 9.9 1.4V12.2h-9.9v7.3Z"/></svg>
+          Windows 10 / 11 — instalator .exe
+        </span>
+        <span class="pill">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139zm.529 3.405h.013c.213 0 .396.062.584.198.19.135.33.332.438.533.105.259.158.459.166.724 0-.02.006-.04.006-.06v.105a.086.086 0 01-.004-.021l-.004-.024a1.807 1.807 0 01-.15.706.953.953 0 01-.213.335.71.71 0 00-.088-.042c-.104-.045-.198-.064-.284-.133a1.312 1.312 0 00-.22-.066c.05-.06.146-.133.183-.198.053-.128.082-.264.088-.402v-.02a1.21 1.21 0 00-.061-.4c-.045-.134-.101-.2-.183-.333-.084-.066-.167-.132-.267-.132h-.016c-.093 0-.176.03-.262.132a.8.8 0 00-.205.334 1.18 1.18 0 00-.09.4v.019c.002.089.008.179.02.267-.193-.067-.438-.135-.607-.202a1.635 1.635 0 01-.018-.2v-.02a1.772 1.772 0 01.15-.768c.082-.22.232-.406.43-.533a.985.985 0 01.594-.2zm-2.962.059h.036c.142 0 .27.048.399.135.146.129.264.288.344.465.09.199.14.4.153.667v.004c.007.134.006.2-.002.266v.08c-.03.007-.056.018-.083.024-.152.055-.274.135-.393.2.012-.09.013-.18.003-.267v-.015c-.012-.133-.04-.2-.082-.333a.613.613 0 00-.166-.267.248.248 0 00-.183-.064h-.021c-.071.006-.13.04-.186.132a.552.552 0 00-.12.27.944.944 0 00-.023.33v.015c.012.135.037.2.08.334.046.134.098.2.166.268.01.009.02.018.034.024-.07.057-.117.07-.176.136a.304.304 0 01-.131.068 2.62 2.62 0 01-.275-.402 1.772 1.772 0 01-.155-.667 1.759 1.759 0 01.08-.668 1.43 1.43 0 01.283-.535c.128-.133.26-.2.418-.2zm1.37 1.706c.332 0 .733.065 1.216.399.293.2.523.269 1.052.468h.003c.255.136.405.266.478.399v-.131a.571.571 0 01.016.47c-.123.31-.516.643-1.063.842v.002c-.268.135-.501.333-.775.465-.276.135-.588.292-1.012.267a1.139 1.139 0 01-.448-.067 3.566 3.566 0 01-.322-.198c-.195-.135-.363-.332-.612-.465v-.005h-.005c-.4-.246-.616-.512-.686-.71-.07-.268-.005-.47.193-.6.224-.135.38-.271.483-.336.104-.074.143-.102.176-.131h.002v-.003c.169-.202.436-.47.839-.601.139-.036.294-.065.466-.065zm2.8 2.142c.358 1.417 1.196 3.475 1.735 4.473.286.534.855 1.659 1.102 3.024.156-.005.33.018.513.064.646-1.671-.546-3.467-1.089-3.966-.22-.2-.232-.335-.123-.335.59.534 1.365 1.572 1.646 2.757.13.535.16 1.104.021 1.67.067.028.135.06.205.067 1.032.534 1.413.938 1.23 1.537v-.043c-.06-.003-.12 0-.18 0h-.016c.151-.467-.182-.825-1.065-1.224-.915-.4-1.646-.336-1.77.465-.008.043-.013.066-.018.135-.068.023-.139.053-.209.064-.43.268-.662.669-.793 1.187-.13.533-.17 1.156-.205 1.869v.003c-.02.334-.17.838-.319 1.35-1.5 1.072-3.58 1.538-5.348.334a2.645 2.645 0 00-.402-.533 1.45 1.45 0 00-.275-.333c.182 0 .338-.03.465-.067a.615.615 0 00.314-.334c.108-.267 0-.697-.345-1.163-.345-.467-.931-.995-1.788-1.521-.63-.4-.986-.87-1.15-1.396-.165-.534-.143-1.085-.015-1.645.245-1.07.873-2.11 1.274-2.763.107-.065.037.135-.408.974-.396.751-1.14 2.497-.122 3.854a8.123 8.123 0 01.647-2.876c.564-1.278 1.743-3.504 1.836-5.268.048.036.217.135.289.202.218.133.38.333.59.465.21.201.477.335.876.335.039.003.075.006.11.006.412 0 .73-.134.997-.268.29-.134.52-.334.74-.4h.005c.467-.135.835-.402 1.044-.7zm2.185 8.958c.037.6.343 1.245.882 1.377.588.134 1.434-.333 1.791-.765l.211-.01c.315-.007.577.01.847.268l.003.003c.208.199.305.53.391.876.085.4.154.78.409 1.066.486.527.645.906.636 1.14l.003-.007v.018l-.003-.012c-.015.262-.185.396-.498.595-.63.401-1.746.712-2.457 1.57-.618.737-1.37 1.14-2.036 1.191-.664.053-1.237-.2-1.574-.898l-.005-.003c-.21-.4-.12-1.025.056-1.69.176-.668.428-1.344.463-1.897.037-.714.076-1.335.195-1.814.12-.465.308-.797.641-.984l.045-.022zm-10.814.049h.01c.053 0 .105.005.157.014.376.055.706.333 1.023.752l.91 1.664.003.003c.243.533.754 1.064 1.189 1.637.434.598.77 1.131.729 1.57v.006c-.057.744-.48 1.148-1.125 1.294-.645.135-1.52.002-2.395-.464-.968-.536-2.118-.469-2.857-.602-.369-.066-.61-.2-.723-.4-.11-.2-.113-.602.123-1.23v-.004l.002-.003c.117-.334.03-.752-.027-1.118-.055-.401-.083-.71.043-.94.16-.334.396-.4.69-.533.294-.135.64-.202.915-.47h.002v-.002c.256-.268.445-.601.668-.838.19-.201.38-.336.663-.336zm7.159-9.074c-.435.201-.945.535-1.488.535-.542 0-.97-.267-1.28-.466-.154-.134-.28-.268-.373-.335-.164-.134-.144-.333-.074-.333.109.016.129.134.199.2.096.066.215.2.36.333.292.2.68.467 1.167.467.485 0 1.053-.267 1.398-.466.195-.135.445-.334.648-.467.156-.136.149-.267.279-.267.128.016.034.134-.147.332a8.097 8.097 0 01-.69.468zm-1.082-1.583V5.64c-.006-.02.013-.042.029-.05.074-.043.18-.027.26.004.063 0 .16.067.15.135-.006.049-.085.066-.135.066-.055 0-.092-.043-.141-.068-.052-.018-.146-.008-.163-.065zm-.551 0c-.02.058-.113.049-.166.066-.047.025-.086.068-.14.068-.05 0-.13-.02-.136-.068-.01-.066.088-.133.15-.133.08-.031.184-.047.259-.005.019.009.036.03.03.05v.02h.003z"/></svg>
+          Linux — .deb i AppImage
+        </span>
+      </div>
+
+      <div class="mini-stats reveal">
+        <div><strong><span class="roll" data-count="252">0</span></strong><span>stacji w bazie</span></div>
+        <div><strong><span class="roll" data-count="30">0</span></strong><span>gatunków</span></div>
+        <div><strong>~4<span style="font-size:.6em">%</span></strong><span>CPU podczas grania</span></div>
+        <div><strong>3,3<span style="font-size:.6em"> MB</span></strong><span>rozmiar binarki</span></div>
+      </div>
+
+      <span class="scroll-cue reveal" aria-hidden="true"><i></i>przewiń</span>
+    </div>
+
+    <!-- interaktywna makieta aplikacji -->
+    <div class="mock-shell reveal zoom" data-tilt="1" data-tilt-max="7">
+      <div class="mock-stage">
+        <div class="mock" id="mock" aria-label="Interaktywna makieta aplikacji Antena">
+          <div class="mock-bar">
+            <button class="mock-play" id="mockPlay" data-cursor="play" aria-label="Odtwórz lub zatrzymaj">
+              <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="mock-now">
+              <div class="t" id="mockTitle">Antena</div>
+              <div class="s" id="mockSub">wybierz stację z listy poniżej</div>
+            </div>
+            <div class="eq" id="mockEq" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="mock-vol">
+              <button id="mockMute" aria-label="Wycisz" data-cursor="link">
+                <svg viewBox="0 0 24 24"><path d="M4 9h3l4-4v14l-4-4H4z"/></svg>
+              </button>
+              <input id="mockVol" type="range" min="0" max="100" step="1" value="80" aria-label="Głośność" />
+            </div>
+          </div>
+
+          <div class="mock-tools">
+            <input id="mockSearch" class="mock-search" type="search" placeholder="Szukaj stacji, gatunku, kraju…" autocomplete="off" spellcheck="false" />
+            <div class="mock-chips" id="mockChips"></div>
+          </div>
+
+          <ul class="mock-list" id="mockList"></ul>
+
+          <div class="mock-status">
+            <span class="left" id="mockState">Zatrzymane</span>
+            <span id="mockCount"></span>
+          </div>
+        </div>
+      </div>
+      <audio id="mockAudio" preload="none"></audio>
+    </div>
+  </div>
+
+  <p class="mock-hint reveal">
+    Naprawdę gra w przeglądarce. Spróbuj: <kbd>/</kbd> szukaj · <kbd>Space</kbd> play · <kbd>f</kbd> ulubione · <kbd>m</kbd> cisza
+  </p>
+</section>
+
+<!-- ======================= TICKER ======================= -->
+<div class="ticker" aria-hidden="true">
+  <div class="mq" id="tickerTrack"></div>
+</div>
+
+<!-- ======================= BAND ======================= -->
+<div class="band" aria-hidden="true">
+  <div class="band-line" id="bandA"></div>
+  <div class="band-line" id="bandB" style="margin-top:.06em"></div>
+</div>
+
+<!-- ======================= FUNKCJE ======================= -->
+<section id="funkcje">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><em>01</em>Funkcje</span>
+      <h2 class="h2 reveal" data-split>Wszystko, co potrzebne.<br /><span class="grad">Nic, co przeszkadza.</span></h2>
+      <p class="lead">Antena nie próbuje być platformą. Jest radiem: włączasz, wybierasz stację, słuchasz.</p>
+    </div>
+
+    <div class="bento">
+      <article class="card c-3 hi reveal" data-spotlight data-tilt="1" data-tilt-max="4">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 12a16 16 0 0 1 16 0"/><path d="M7.5 15.5a11 11 0 0 1 9 0"/><path d="M11 19a4.5 4.5 0 0 1 2 0"/><circle cx="12" cy="21" r="1"/></svg></span>
+        <h3>252 stacje, 30 gatunków</h3>
+        <p>
+          78 polskich (RMF i wszystkie jego kanały, Zet, Chilli Zet, Eska, Antyradio, Radio 357,
+          Radio Nowy Świat, Radio Kampus, TOK FM, Wnet, Polskie Radio, stacje lokalne) oraz
+          zagraniczne — Radio Paradise, FIP, Deutschlandfunk, NTS, Radio Swiss Pop, Venice Classic
+          i osiem kanałów SomaFM.
+        </p>
+        <span class="tag">baza: 30 KB, generowana z Radio-Browser i przetestowana</span>
+      </article>
+
+      <article class="card c-3 reveal" data-spotlight data-tilt="1" data-tilt-max="4">
+        <span class="ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+        <h3>Szukaj i filtruj bez opóźnień</h3>
+        <p>
+          Wyszukiwanie po nazwie, gatunku i kraju oraz chipsy gatunków. Lista jest budowana raz —
+          filtrowanie to tylko przełączanie klasy CSS, więc nic się nie przerenderowuje.
+        </p>
+        <span class="tag">content-visibility: auto</span>
+      </article>
+
+      <article class="card c-2 reveal" data-spotlight>
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z"/></svg></span>
+        <h3>Ulubione</h3>
+        <p>Gwiazdka klikiem albo klawiszem <b>f</b>. Lista zapamiętana lokalnie, bez logowania i chmury.</p>
+      </article>
+
+      <article class="card c-2 reveal" data-spotlight>
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.6"/><circle cx="16.5" cy="16" r="2.6"/></svg></span>
+        <h3>Tytuł grającego utworu</h3>
+        <p>Metadane ICY/Icecast w pasku u góry, jedno krótkie zapytanie co 15 s. Bez pollowania w tle.</p>
+      </article>
+
+      <article class="card c-2 reveal" data-spotlight>
+        <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.4"/><path d="M7 10h4M7 13h7"/><circle cx="17" cy="10" r="1.6"/></svg></span>
+        <h3>Klawisze multimediów</h3>
+        <p>Media Session API — gdy WebKitGTK eksponuje MPRIS, stacja pojawia się też w panelu systemowym.</p>
+      </article>
+
+      <article class="card c-2 reveal" data-spotlight>
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/><circle cx="12" cy="12" r="3.4"/></svg></span>
+        <h3>Pamięta wszystko</h3>
+        <p>Głośność, wyciszenie i ostatnia stacja wracają po ponownym uruchomieniu.</p>
+      </article>
+
+      <article class="card c-2 reveal" data-spotlight>
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg></span>
+        <h3>Zero frameworków</h3>
+        <p>~34 KB plików interfejsu, brak npm, brak bundlera, brak dev-serwera. UI jest wkompilowane w binarkę.</p>
+        <span class="tag">HTML + CSS + JS</span>
+      </article>
+
+      <article class="card c-2 reveal" data-spotlight>
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>
+        <h3>Świadomie bez animacji</h3>
+        <p>Animowany korektor wymuszał w WebKitGTK ciągłe odświeżanie okna. Wskaźnik jest statyczny — i dlatego radio zjada ~4% rdzenia.</p>
+      </article>
+
+      <article class="card c-3 reveal" data-spotlight>
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5.4c0 4.3 2.9 8.2 7 9.6 4.1-1.4 7-5.3 7-9.6V6z"/><path d="m9.5 12 1.8 1.9L15 10"/></svg></span>
+        <h3>Prywatność domyślnie</h3>
+        <p>
+          Brak kont, brak telemetrii. CSP blokuje wszystko poza własnymi plikami i strumieniami audio,
+          a uprawnienia Tauri są ograniczone do <b>core:default</b>.
+        </p>
+        <span class="tag">default-src 'self'</span>
+      </article>
+
+      <article class="card c-3 reveal" data-spotlight>
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h13"/><path d="M17 15v4M15 17h4"/></svg></span>
+        <h3>Własna stacja w jednej linii</h3>
+        <p>
+          Dopisz wpis do tablicy w <b>ui/stations.js</b> — nowy gatunek automatycznie pojawi się jako chip.
+          Stream padł? Nazwa robi się czerwona, a status pokazuje komunikat błędu.
+        </p>
+        <span class="tag">{ n, u, g, k, b, c }</span>
+      </article>
+    </div>
+
+    <div class="stats reveal">
+      <div class="stat"><b><span class="roll" data-count="252">0</span></b><span>stacji</span></div>
+      <div class="stat"><b><span class="roll" data-count="30">0</span></b><span>gatunków</span></div>
+      <div class="stat"><b><span class="roll" data-count="78">0</span></b><span>stacji z Polski</span></div>
+      <div class="stat"><b><span class="roll" data-count="34">0</span><span class="u">KB</span></b><span>cały interfejs</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= INTERFEJS ======================= -->
+<section id="stacje">
+  <div class="wrap">
+    <div class="shot">
+      <figure class="shot-fig">
+        <div class="shot-frame reveal from-l" data-tilt="1" data-tilt-max="6">
+          <img src="zrzut-ekranu.png" alt="Zrzut ekranu aplikacji Antena — lista stacji, wyszukiwarka, chipsy gatunków" width="440" height="680" loading="lazy" />
+        </div>
+        <figcaption>Prawdziwe okno aplikacji — 440 × 680 px. Zrzut z wcześniejszego wydania; dziś baza liczy 252 stacje.</figcaption>
+      </figure>
+
+      <div>
+        <span class="eyebrow reveal"><em>02</em>Interfejs</span>
+        <h2 class="h2 reveal" data-split>Ciemny, kompaktowy,<br /><span class="grad">przyjemnie szybki.</span></h2>
+        <p class="lead reveal" style="margin-bottom:36px">
+          Okno 440×680 px, jeden element <b>&lt;audio&gt;</b> na całe radio i cztery sekcje, które
+          ogarniasz w pięć sekund.
+        </p>
+
+        <ul class="checklist">
+          <li class="reveal">
+            <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 12.5 2 2 4-4.5"/></svg></span>
+            <div><h4>Play, wyszukiwanie, chipsy, lista</h4><p>Nic więcej nie trzeba — i nic więcej nie ma.</p></div>
+          </li>
+          <li class="reveal">
+            <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 18V9M9 18V5M14 18v-7M19 18v-4"/></svg></span>
+            <div><h4>Statyczny wskaźnik „gra”</h4><p>Celowa decyzja: brak animacji oznacza brak ciągłego odświeżania okna.</p></div>
+          </li>
+          <li class="reveal">
+            <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v10"/><path d="m8 9 4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+            <div><h4>preload="none"</h4><p>Przed kliknięciem nic się nie łączy z internetem. Zero ruchu w tle.</p></div>
+          </li>
+          <li class="reveal">
+            <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 20h8M4 20h4M6 20V8l6-4 6 4v12"/><path d="M10 20v-5h4v5"/></svg></span>
+            <div><h4>Struktura projektu, którą przejrzysz w minutę</h4><p><b>ui/</b> to frontend, <b>src-tauri/</b> to okno i odczyt metadanych ICY w Ruście.</p></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= PLATFORMY ======================= -->
+<section id="platformy">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><em>03</em>Platformy</span>
+      <h2 class="h2 reveal" data-split>Windows i Linux.<br /><span class="grad">Ta sama binarka z Rust.</span></h2>
+      <p class="lead">
+        Cele bundli są zdefiniowane w <b>tauri.conf.json</b>, więc na każdym systemie powstaje dokładnie
+        to, co trzeba: na Linuksie <b>.deb</b> i AppImage, na Windowsie instalator <b>.exe</b> (NSIS).
+      </p>
+    </div>
+
+    <div class="platforms">
+      <article class="pf reveal from-l" data-tilt="1" data-tilt-max="5">
+        <span class="glyph"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.6 10.2 4.6v6.5H3V5.6Zm0 12.8 7.2 1v-6.4H3v5.4ZM11.1 4.5 21 3v8.1h-9.9V4.5Zm0 15 9.9 1.4V12.2h-9.9v7.3Z"/></svg></span>
+        <h3>Windows 10 / 11</h3>
+        <p>Instalator NSIS — standardowy, cichy kreator. Bez zależności do doinstalowania.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12.5 4 4 10-10"/></svg> Jeden plik <b>.exe</b>, instalacja kilku klików</li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12.5 4 4 10-10"/></svg> WebView2 zamiast WebKitGTK — lżejszy start</li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12.5 4 4 10-10"/></svg> Buildy tworzone automatycznie w GitHub Actions</li>
+        </ul>
+        <div class="files"><span class="file">Antena_1.0.0_x64-setup.exe</span></div>
+        <a class="btn btn-primary" href="https://github.com/multicolor-rgb/antena/releases/download/1.0.0/Antena_1.0.0_x64-setup.exe" target="_blank" rel="noopener" data-cursor="link" data-magnet="0.3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>
+          <span>Pobierz instalator .exe</span>
+        </a>
+        <p class="note">SmartScreen może pokazać ostrzeżenie o nieznanym wydawcy — wybierz <code>Więcej informacji → Uruchom mimo to</code>.</p>
+      </article>
+
+      <article class="pf reveal from-r" data-tilt="1" data-tilt-max="5">
+        <span class="glyph"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139zm.529 3.405h.013c.213 0 .396.062.584.198.19.135.33.332.438.533.105.259.158.459.166.724 0-.02.006-.04.006-.06v.105a.086.086 0 01-.004-.021l-.004-.024a1.807 1.807 0 01-.15.706.953.953 0 01-.213.335.71.71 0 00-.088-.042c-.104-.045-.198-.064-.284-.133a1.312 1.312 0 00-.22-.066c.05-.06.146-.133.183-.198.053-.128.082-.264.088-.402v-.02a1.21 1.21 0 00-.061-.4c-.045-.134-.101-.2-.183-.333-.084-.066-.167-.132-.267-.132h-.016c-.093 0-.176.03-.262.132a.8.8 0 00-.205.334 1.18 1.18 0 00-.09.4v.019c.002.089.008.179.02.267-.193-.067-.438-.135-.607-.202a1.635 1.635 0 01-.018-.2v-.02a1.772 1.772 0 01.15-.768c.082-.22.232-.406.43-.533a.985.985 0 01.594-.2zm-2.962.059h.036c.142 0 .27.048.399.135.146.129.264.288.344.465.09.199.14.4.153.667v.004c.007.134.006.2-.002.266v.08c-.03.007-.056.018-.083.024-.152.055-.274.135-.393.2.012-.09.013-.18.003-.267v-.015c-.012-.133-.04-.2-.082-.333a.613.613 0 00-.166-.267.248.248 0 00-.183-.064h-.021c-.071.006-.13.04-.186.132a.552.552 0 00-.12.27.944.944 0 00-.023.33v.015c.012.135.037.2.08.334.046.134.098.2.166.268.01.009.02.018.034.024-.07.057-.117.07-.176.136a.304.304 0 01-.131.068 2.62 2.62 0 01-.275-.402 1.772 1.772 0 01-.155-.667 1.759 1.759 0 01.08-.668 1.43 1.43 0 01.283-.535c.128-.133.26-.2.418-.2zm1.37 1.706c.332 0 .733.065 1.216.399.293.2.523.269 1.052.468h.003c.255.136.405.266.478.399v-.131a.571.571 0 01.016.47c-.123.31-.516.643-1.063.842v.002c-.268.135-.501.333-.775.465-.276.135-.588.292-1.012.267a1.139 1.139 0 01-.448-.067 3.566 3.566 0 01-.322-.198c-.195-.135-.363-.332-.612-.465v-.005h-.005c-.4-.246-.616-.512-.686-.71-.07-.268-.005-.47.193-.6.224-.135.38-.271.483-.336.104-.074.143-.102.176-.131h.002v-.003c.169-.202.436-.47.839-.601.139-.036.294-.065.466-.065zm2.8 2.142c.358 1.417 1.196 3.475 1.735 4.473.286.534.855 1.659 1.102 3.024.156-.005.33.018.513.064.646-1.671-.546-3.467-1.089-3.966-.22-.2-.232-.335-.123-.335.59.534 1.365 1.572 1.646 2.757.13.535.16 1.104.021 1.67.067.028.135.06.205.067 1.032.534 1.413.938 1.23 1.537v-.043c-.06-.003-.12 0-.18 0h-.016c.151-.467-.182-.825-1.065-1.224-.915-.4-1.646-.336-1.77.465-.008.043-.013.066-.018.135-.068.023-.139.053-.209.064-.43.268-.662.669-.793 1.187-.13.533-.17 1.156-.205 1.869v.003c-.02.334-.17.838-.319 1.35-1.5 1.072-3.58 1.538-5.348.334a2.645 2.645 0 00-.402-.533 1.45 1.45 0 00-.275-.333c.182 0 .338-.03.465-.067a.615.615 0 00.314-.334c.108-.267 0-.697-.345-1.163-.345-.467-.931-.995-1.788-1.521-.63-.4-.986-.87-1.15-1.396-.165-.534-.143-1.085-.015-1.645.245-1.07.873-2.11 1.274-2.763.107-.065.037.135-.408.974-.396.751-1.14 2.497-.122 3.854a8.123 8.123 0 01.647-2.876c.564-1.278 1.743-3.504 1.836-5.268.048.036.217.135.289.202.218.133.38.333.59.465.21.201.477.335.876.335.039.003.075.006.11.006.412 0 .73-.134.997-.268.29-.134.52-.334.74-.4h.005c.467-.135.835-.402 1.044-.7zm2.185 8.958c.037.6.343 1.245.882 1.377.588.134 1.434-.333 1.791-.765l.211-.01c.315-.007.577.01.847.268l.003.003c.208.199.305.53.391.876.085.4.154.78.409 1.066.486.527.645.906.636 1.14l.003-.007v.018l-.003-.012c-.015.262-.185.396-.498.595-.63.401-1.746.712-2.457 1.57-.618.737-1.37 1.14-2.036 1.191-.664.053-1.237-.2-1.574-.898l-.005-.003c-.21-.4-.12-1.025.056-1.69.176-.668.428-1.344.463-1.897.037-.714.076-1.335.195-1.814.12-.465.308-.797.641-.984l.045-.022zm-10.814.049h.01c.053 0 .105.005.157.014.376.055.706.333 1.023.752l.91 1.664.003.003c.243.533.754 1.064 1.189 1.637.434.598.77 1.131.729 1.57v.006c-.057.744-.48 1.148-1.125 1.294-.645.135-1.52.002-2.395-.464-.968-.536-2.118-.469-2.857-.602-.369-.066-.61-.2-.723-.4-.11-.2-.113-.602.123-1.23v-.004l.002-.003c.117-.334.03-.752-.027-1.118-.055-.401-.083-.71.043-.94.16-.334.396-.4.69-.533.294-.135.64-.202.915-.47h.002v-.002c.256-.268.445-.601.668-.838.19-.201.38-.336.663-.336zm7.159-9.074c-.435.201-.945.535-1.488.535-.542 0-.97-.267-1.28-.466-.154-.134-.28-.268-.373-.335-.164-.134-.144-.333-.074-.333.109.016.129.134.199.2.096.066.215.2.36.333.292.2.68.467 1.167.467.485 0 1.053-.267 1.398-.466.195-.135.445-.334.648-.467.156-.136.149-.267.279-.267.128.016.034.134-.147.332a8.097 8.097 0 01-.69.468zm-1.082-1.583V5.64c-.006-.02.013-.042.029-.05.074-.043.18-.027.26.004.063 0 .16.067.15.135-.006.049-.085.066-.135.066-.055 0-.092-.043-.141-.068-.052-.018-.146-.008-.163-.065zm-.551 0c-.02.058-.113.049-.166.066-.047.025-.086.068-.14.068-.05 0-.13-.02-.136-.068-.01-.066.088-.133.15-.133.08-.031.184-.047.259-.005.019.009.036.03.03.05v.02h.003z"/></svg></span>
+        <h3>Linux</h3>
+        <p>Natywna paczka <b>.deb</b> dla Debiana/Ubuntu/Minta albo przenośny AppImage, który uruchomisz z pendrive'a.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12.5 4 4 10-10"/></svg> GTK3 + WebKitGTK 4.1, dźwięk przez GStreamer</li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12.5 4 4 10-10"/></svg> Arch i Fedora — jedna komenda w menedżerze pakietów</li>
+          <li><svg viewBox="0 0 24 24"><path d="m5 12.5 4 4 10-10"/></svg> Możesz też po prostu <b>./run.sh</b> ze źródeł</li>
+        </ul>
+        <div class="files"><span class="file">Antena_1.0.0_amd64.deb</span><span class="file">Antena_1.0.0_amd64.AppImage</span></div>
+        <a class="btn btn-primary" href="https://github.com/multicolor-rgb/antena/releases/latest" target="_blank" rel="noopener" data-cursor="link" data-magnet="0.3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>
+          <span>Pobierz dla Linuksa</span>
+        </a>
+        <p class="note">macOS? Da się — <code>targets</code> w <b>tauri.conf.json</b> zawiera <code>dmg</code>, a workflow trzeba zbudować na maszynie Apple.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= INSTALACJA ======================= -->
+<section id="instalacja">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><em>04</em>Instalacja</span>
+      <h2 class="h2 reveal" data-split>Trzy komendy i <span class="grad">gra muzę</span>.</h2>
+      <p class="lead">Wybierz swój system. Wszystkie pliki pochodzą z wydania <b>v1.0.0</b> na GitHubie.</p>
+    </div>
+
+    <div class="install reveal zoom">
+      <div class="tabs" role="tablist" aria-label="Sposoby instalacji">
+        <span class="tab-pill" id="tabPill" aria-hidden="true"></span>
+        <button class="tab" role="tab" aria-selected="true" data-tab="win" data-cursor="link">Windows</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="deb" data-cursor="link">Linux · .deb</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="appimage" data-cursor="link">Linux · AppImage</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="deps" data-cursor="link">Zależności</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="src" data-cursor="link">Ze źródeł</button>
+      </div>
+
+      <div class="panels">
+        <div class="panel on" data-panel="win" role="tabpanel">
+          <h4>Windows 10 / 11</h4>
+          <p>Pobierz instalator NSIS z sekcji <b>Assets</b> i uruchom go podwójnym klikiem.</p>
+          <div class="steps">
+            <div class="step"><b>1</b><p>Wejdź na <strong>Releases → v1.0.0</strong> i pobierz <strong>Antena_1.0.0_x64-setup.exe</strong>.</p></div>
+            <div class="step"><b>2</b><p>Uruchom instalator. Windows może zapytać o SmartScreen — <strong>Więcej informacji → Uruchom mimo to</strong>.</p></div>
+            <div class="step"><b>3</b><p>Gotowe. Antena pojawi się w menu Start; ustawienia (głośność, ostatnia stacja) zapisują się lokalnie.</p></div>
+          </div>
+          <a class="btn btn-primary" style="margin-top:26px" href="https://github.com/multicolor-rgb/antena/releases/download/1.0.0/Antena_1.0.0_x64-setup.exe" target="_blank" rel="noopener" data-cursor="link" data-magnet="0.3"><span>Pobierz .exe</span></a>
+        </div>
+
+        <div class="panel" data-panel="deb" role="tabpanel">
+          <h4>Debian / Ubuntu / Mint — paczka .deb</h4>
+          <p>Paczka deklaruje zależności <b>libwebkit2gtk-4.1-0</b> i <b>libgtk-3-0</b>, więc <code style="font:500 12.5px/1 var(--mono);color:var(--acc)">apt</code> dociągnie je sam.</p>
+          <div class="cmd" data-copy="sudo apt install ./Antena_1.0.0_amd64.deb">
+            <pre><span class="cm"># pobierz plik z Releases, potem:</span>
+sudo apt install ./Antena_1.0.0_amd64.deb</pre>
+            <button class="copy" data-cursor="copy" aria-label="Kopiuj"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button>
+          </div>
+          <div class="cmd" data-copy="sudo dpkg -i Antena_1.0.0_amd64.deb && sudo apt -f install">
+            <pre><span class="cm"># alternatywnie, gdy wolisz dpkg</span>
+sudo dpkg -i Antena_1.0.0_amd64.deb <span class="fl">&amp;&amp;</span> sudo apt -f install</pre>
+            <button class="copy" data-cursor="copy" aria-label="Kopiuj"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button>
+          </div>
+          <a class="btn btn-primary" style="margin-top:26px" href="https://github.com/multicolor-rgb/antena/releases/download/1.0.0/Antena_1.0.0_amd64.deb" target="_blank" rel="noopener" data-cursor="link" data-magnet="0.3"><span>Pobierz .deb</span></a>
+        </div>
+
+        <div class="panel" data-panel="appimage" role="tabpanel">
+          <h4>AppImage — bez instalacji</h4>
+          <p>Jeden plik, który działa wszędzie tam, gdzie jest WebKitGTK 4.1 i GStreamer. Świetny na pendrive.</p>
+          <div class="cmd" data-copy="chmod +x Antena_1.0.0_amd64.AppImage && ./Antena_1.0.0_amd64.AppImage">
+            <pre>chmod +x Antena_1.0.0_amd64.AppImage
+./Antena_1.0.0_amd64.AppImage</pre>
+            <button class="copy" data-cursor="copy" aria-label="Kopiuj"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button>
+          </div>
+          <p class="note">Brak dźwięku? To prawie zawsze brakujące wtyczki GStreamera — zobacz zakładkę <b>Zależności</b>.</p>
+          <a class="btn btn-primary" style="margin-top:22px" href="https://github.com/multicolor-rgb/antena/releases/download/1.0.0/Antena_1.0.0_amd64.AppImage" target="_blank" rel="noopener" data-cursor="link" data-magnet="0.3"><span>Pobierz AppImage</span></a>
+        </div>
+
+        <div class="panel" data-panel="deps" role="tabpanel">
+          <h4>Zależności systemowe (Linux)</h4>
+          <p>Bez kodeków GStreamera radio się uruchomi, ale nie zagra — <b>mp3/mpg123</b> i <b>aac/faad</b> są w paczkach <i>ugly</i> i <i>bad</i>.</p>
+          <div class="cmd" data-copy="sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libssl-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav">
+            <pre><span class="cm"># Debian / Ubuntu / Mint</span>
+sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libssl-dev \
+  gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+  gstreamer1.0-plugins-ugly gstreamer1.0-plugins-bad gstreamer1.0-libav</pre>
+            <button class="copy" data-cursor="copy" aria-label="Kopiuj"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button>
+          </div>
+          <div class="cmd" data-copy="sudo pacman -S webkit2gtk-4.1 gtk3 openssl gst-plugins-base gst-plugins-good gst-plugins-ugly gst-plugins-bad gst-libav">
+            <pre><span class="cm"># Arch</span>
+sudo pacman -S webkit2gtk-4.1 gtk3 openssl gst-plugins-base \
+  gst-plugins-good gst-plugins-ugly gst-plugins-bad gst-libav</pre>
+            <button class="copy" data-cursor="copy" aria-label="Kopiuj"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button>
+          </div>
+          <div class="cmd" data-copy="sudo dnf install webkit2gtk4.1-devel gtk3-devel openssl-devel gstreamer1-plugins-{base,good,bad-free,ugly-free} gstreamer1-libav">
+            <pre><span class="cm"># Fedora</span>
+sudo dnf install webkit2gtk4.1-devel gtk3-devel openssl-devel \
+  gstreamer1-plugins-{base,good,bad-free,ugly-free} gstreamer1-libav</pre>
+            <button class="copy" data-cursor="copy" aria-label="Kopiuj"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button>
+          </div>
+        </div>
+
+        <div class="panel" data-panel="src" role="tabpanel">
+          <h4>Ze źródeł (Rust 1.77+)</h4>
+          <p>Bez <b>node_modules</b> i bez dev-serwera: pliki interfejsu są wkompilowane w binarkę.</p>
+          <div class="cmd" data-copy="git clone https://github.com/multicolor-rgb/antena.git && cd antena && ./run.sh">
+            <pre>git clone https://github.com/multicolor-rgb/antena.git
+cd antena
+./run.sh            <span class="cm"># tryb deweloperski (cargo run)</span></pre>
+            <button class="copy" data-cursor="copy" aria-label="Kopiuj"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button>
+          </div>
+          <div class="cmd" data-copy="./build.sh && ./build.sh bundle">
+            <pre>./build.sh          <span class="cm"># binarka release: src-tauri/target/release/antena</span>
+./build.sh bundle   <span class="cm"># paczki .deb / AppImage (pobierze tauri-cli, gdy brak)</span></pre>
+            <button class="copy" data-cursor="copy" aria-label="Kopiuj"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button>
+          </div>
+          <div class="cmd" data-copy="cargo test --manifest-path src-tauri/Cargo.toml">
+            <pre><span class="cm"># testy parsera metadanych ICY</span>
+cargo test --manifest-path src-tauri/Cargo.toml</pre>
+            <button class="copy" data-cursor="copy" aria-label="Kopiuj"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= WYDAJNOŚĆ ======================= -->
+<section id="wydajnosc">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><em>05</em>Wydajność</span>
+      <h2 class="h2 reveal" data-split>Lekkość, którą <span class="grad">widać w htop</span>.</h2>
+      <p class="lead">
+        Pomiar na tej samej maszynie (XFCE, X11, WebKitGTK 2.52); jeden rdzeń = 100%.
+        Różnicę robi jedna decyzja: brak animacji w interfejsie.
+      </p>
+    </div>
+
+    <div class="perf">
+      <div class="panelbox reveal from-l">
+        <h3>Zużycie CPU podczas grania</h3>
+        <p class="sub">Stacja MP3 128 kbps, ten sam strumień, ten sam sprzęt.</p>
+
+        <div class="bar">
+          <div class="bar-top"><span>Animowany wskaźnik „gra”</span><b>13–45%</b></div>
+          <div class="bar-track"><div class="bar-fill bad" data-w="38"></div></div>
+        </div>
+        <div class="bar">
+          <div class="bar-top"><span>Wskaźnik statyczny (Antena)</span><b>~4%</b></div>
+          <div class="bar-track"><div class="bar-fill good" data-w="10"></div></div>
+        </div>
+        <div class="bar" style="margin-bottom:0">
+          <div class="bar-top"><span>Zatrzymane / bezczynne</span><b>~0%</b></div>
+          <div class="bar-track"><div class="bar-fill good" data-w="2"></div></div>
+        </div>
+
+        <p class="tiny">Pasek ilustruje proporcje; wartości liczbowe pochodzą z pomiaru w README projektu.</p>
+      </div>
+
+      <div class="panelbox reveal from-r">
+        <h3>Co jeszcze jest lekkie</h3>
+        <p class="sub">Profil release: <b>opt-level = "z"</b>, LTO, strip, panic = abort.</p>
+
+        <div class="mem">
+          <div><span>Binarka aplikacji</span><b>3,3 MB</b></div>
+          <div><span>Pliki interfejsu (UI)</span><b>~34 KB</b></div>
+          <div><span>Baza stacji</span><b>30 KB</b></div>
+          <div><span>Zapytanie o metadane ICY</span><b>co 15 s</b></div>
+          <div><span>Frameworki JS</span><b>0</b></div>
+          <div><span>Ruch sieciowy przed kliknięciem</span><b>0 B</b></div>
+        </div>
+
+        <p class="tiny">
+          Pamięć (~0,4 GB RSS) to głównie współdzielone biblioteki WebKitGTK — każda aplikacja Tauri
+          na Linuksie korzysta z systemowej przeglądarki.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= SKRÓTY ======================= -->
+<section id="skroty">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><em>06</em>Skróty klawiszowe</span>
+      <h2 class="h2 reveal" data-split>Sterowanie bez myszki.</h2>
+      <p class="lead">Wciśnij klawisz — zobaczysz go tutaj i usłyszysz w makiecie, jeśli jest na ekranie.</p>
+    </div>
+
+    <div class="keys">
+      <div class="key reveal" data-key=" "><kbd>Space</kbd><span>odtwórz / zatrzymaj</span></div>
+      <div class="key reveal" data-key="ArrowUp"><kbd>↑</kbd><span>poprzednia stacja (z uwzględnieniem filtrów)</span></div>
+      <div class="key reveal" data-key="ArrowDown"><kbd>↓</kbd><span>następna stacja</span></div>
+      <div class="key reveal" data-key="/"><kbd>/</kbd><span>przejdź do wyszukiwania</span></div>
+      <div class="key reveal" data-key="f"><kbd>f</kbd><span>dodaj / usuń z ulubionych</span></div>
+      <div class="key reveal" data-key="m"><kbd>m</kbd><span>wycisz</span></div>
+      <div class="key reveal" data-key="Escape"><kbd>Esc</kbd><span>wyczyść wyszukiwanie</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= FAQ ======================= -->
+<section id="faq">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><em>07</em>FAQ</span>
+      <h2 class="h2 reveal" data-split>Uczciwe pytania, <span class="grad">uczciwe odpowiedzi</span>.</h2>
+    </div>
+
+    <div class="faq">
+      <details class="reveal" open>
+        <summary>Dlaczego nie ma Polskiego Radia Trójki ani stacji HLS?<span class="plus"></span></summary>
+        <div class="body">Odtwarzanie robi WebKitGTK przez GStreamer, a <b>strumienie HLS (.m3u8) nie działają</b> w tym stosie. Antena wybiera więc tylko strumienie progresywne: MP3, AAC/AAC+ oraz OGG/Opus. Dlatego nie ma np. Trójki, która nadaje wyłącznie w HLS.</div>
+      </details>
+      <details class="reveal">
+        <summary>Dlaczego proces zajmuje ~0,4 GB RAM?<span class="plus"></span></summary>
+        <div class="body">To charakterystyka WebKitGTK, nie samej Anteny. Każda aplikacja Tauri na Linuksie używa systemowej przeglądarki i dzieli z nią biblioteki (proces główny ~134 MB, proces strony ~229 MB, sieciowy ~65 MB). Sama binarka Anteny ma 3,3 MB.</div>
+      </details>
+      <details class="reveal">
+        <summary>Stacja nie gra i nazwa zrobiła się czerwona. Co dalej?<span class="plus"></span></summary>
+        <div class="body">Adresy strumieni zmieniają się z czasem i część z nich po prostu umiera. Antena pokazuje to od razu: nazwa robi się czerwona, a w pasku dolnym pojawia się komunikat błędu. Wybierz inną stację albo dopisz własny, świeży adres w <code>ui/stations.js</code>.</div>
+      </details>
+      <details class="reveal">
+        <summary>Jak dodać własną stację?<span class="plus"></span></summary>
+        <div class="body">Otwórz <code>ui/stations.js</code> i dopisz wpis na końcu tablicy: <code>{ n: "Nazwa", u: "https://adres/strumienia.mp3", g: "Rock", k: "MP3", b: 128, c: "PL" }</code>. Nowy gatunek automatycznie pojawi się jako chip. Po zmianach w <code>ui/</code> wystarczy ponownie uruchomić <code>./run.sh</code>.</div>
+      </details>
+      <details class="reveal">
+        <summary>Czy muszę coś instalować razem z aplikacją?<span class="plus"></span></summary>
+        <div class="body">Na Windowsie nie — instalator NSIS wystarczy. Na Linuksie paczka .deb dociągnie GTK3 i WebKitGTK 4.1, ale <b>kodeki GStreamera</b> (mp3/mpg123 oraz aac/faad) warto mieć zainstalowane, bo bez nich dźwięk nie zagra. Komendy znajdziesz w zakładce „Zależności”.</div>
+      </details>
+      <details class="reveal">
+        <summary>Będzie wersja na macOS?<span class="plus"></span></summary>
+        <div class="body">Cele bundli w <code>tauri.conf.json</code> zawierają już <code>dmg</code>. macOS trzeba jednak zbudować na macOS — Apple nie udostępnia swojego toolchainu na Linuksa. Wystarczy dopisać jedną pozycję do macierzy w <code>.github/workflows/build.yml</code>; komentarz w pliku pokazuje jak.</div>
+      </details>
+      <details class="reveal">
+        <summary>Czy aplikacja zbiera jakieś dane?<span class="plus"></span></summary>
+        <div class="body">Nie. Brak kont, brak telemetrii, brak synchronizacji. CSP blokuje wszystko poza własnymi plikami i strumieniami audio, a uprawnienia Tauri są ograniczone do <code>core:default</code>. Ulubione i głośność siedzą lokalnie na Twoim dysku.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= WSPARCIE ======================= -->
+<section id="wsparcie">
+  <div class="wrap">
+    <div class="support reveal zoom">
+      <div class="support-in">
+        <div>
+          <span class="eyebrow" style="color:#ff8f8f"><em>08</em>Wsparcie</span>
+          <h2>Podoba Ci się Antena?<br />Postaw kawę autorowi.</h2>
+          <p>
+            Projekt tworzę sam — kod, baza 252 stacji i pilnowanie, czy strumienie jeszcze żyją.
+            Jeśli radio umila Ci dzień, dorzuć się do kolejnych wydań na Ko-fi.
+          </p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-kofi" href="http://ko-fi.com/multicolorplugins" target="_blank" rel="noopener" data-cursor="link" data-magnet="0.35">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a3.5 3.5 0 0 1 0 7H17"/><path d="M3 8h14v7a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Z"/><path d="M7 3v2M11 3v2"/></svg>
+            <span>ko-fi.com/multicolorplugins</span>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/multicolor-rgb/antena" target="_blank" rel="noopener" data-cursor="link" data-magnet="0.3">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.93-.89-1.18-.89-1.18-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+            <span>Daj gwiazdkę na GitHubie</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= STOPKA ======================= -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#top" data-cursor="link">
+          <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 12v9"/><path d="M8 21h8"/><path d="M5.6 5.6a9 9 0 0 0 0 9"/><path d="M18.4 5.6a9 9 0 0 1 0 9"/>
+              <circle cx="12" cy="10" r="2.4" fill="currentColor" stroke="none"/>
+            </svg>
+          </span>
+          <span>Antena<small>radio internetowe</small></span>
+        </a>
+        <p style="color:var(--dim);font-size:14.5px;margin-top:20px;max-width:38ch">
+          Lekkie radio internetowe: 252 stacje, 30 gatunków, tytuł grającego utworu.
+          Bez kont, bez reklam, bez chmury. Windows i Linux.
+        </p>
+      </div>
+
+      <div>
+        <h5>Program</h5>
+        <ul>
+          <li><a href="#funkcje" data-cursor="link">Funkcje</a></li>
+          <li><a href="#platformy" data-cursor="link">Windows i Linux</a></li>
+          <li><a href="#instalacja" data-cursor="link">Instalacja</a></li>
+          <li><a href="#skroty" data-cursor="link">Skróty klawiszowe</a></li>
+          <li><a href="#faq" data-cursor="link">FAQ</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5>Linki</h5>
+        <ul>
+          <li><a href="https://github.com/multicolor-rgb/antena" target="_blank" rel="noopener" data-cursor="link">Repozytorium GitHub</a></li>
+          <li><a href="https://github.com/multicolor-rgb/antena/releases/latest" target="_blank" rel="noopener" data-cursor="link">Wydania (Releases)</a></li>
+          <li><a href="https://github.com/multicolor-rgb/antena/blob/main/README.md" target="_blank" rel="noopener" data-cursor="link">README</a></li>
+          <li><a href="http://ko-fi.com/multicolorplugins" target="_blank" rel="noopener" data-cursor="link">Ko-fi · postaw kawę</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <span>© <span id="year">2026</span> Antena · zbudowane w Rust + Tauri 2</span>
+      <span>Interfejs: czysty HTML/CSS/JS · <a href="http://ko-fi.com/multicolorplugins" target="_blank" rel="noopener" style="color:var(--acc)" data-cursor="link">ko-fi.com/multicolorplugins</a></span>
+    </div>
+
+    <div class="giant" id="giant" aria-hidden="true">ANTENA</div>
+  </div>
+</footer>
+
+<script>
+/* =========================================================================
+   ANTENA — skrypty strony (edycja „awards").
+   Vanilla JS: preloader, płynne przewijanie, split-text, marquee sterowane
+   prędkością scrolla, canvas z falami, tilt 3D, magnes, rolkowe liczniki.
+   ========================================================================= */
+(function () {
+  "use strict";
+
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fine = matchMedia("(pointer:fine)").matches;
+  var $  = function (s, c) { return (c || document).querySelector(s); };
+  var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+  var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
+
+  /* tryb wydajności wybrany w <head>; efektami rządzą przełączniki, które można
+     wyłączyć w locie, gdy pomiar płynności wykaże, że maszyna nie daje rady */
+  var P = window.ANTENA_PERF || {
+    tier: "high", rank: { lite: 0, mid: 1, high: 2 },
+    dpr: 2, bars: 52, layers: 3, canvasFps: 60, mqFps: 60,
+    split: true, cursor: true, smooth: true, tilt: true, magnet: true, parallax: true
+  };
+  var fx = {
+    cursor:   fine && !reduce && P.cursor,
+    smooth:   fine && !reduce && P.smooth,
+    tilt:     fine && !reduce && P.tilt,
+    magnet:   fine && !reduce && P.magnet,
+    parallax: fine && !reduce && P.parallax
+  };
+
+  $("#year").textContent = new Date().getFullYear();
+
+  /* =====================================================================
+     1. PRELOADER
+     ===================================================================== */
+  var pl = $("#preloader"), plBar = $("#plBar"), plCount = $("#plCount"), plDial = $("#plDial");
+  var plDone = false, onFirstPaint = [];
+  var seen = false;
+  try { seen = sessionStorage.getItem("antena-intro") === "1"; } catch (e) {}
+
+  var plDialBars = P.tier === "lite" ? 11 : 26;
+  for (var d = 0; d < plDialBars; d++) {
+    var bar = document.createElement("i");
+    bar.style.animationDelay = (d * (P.tier === "lite" ? 0.1 : 0.045)) + "s";
+    plDial.appendChild(bar);
+  }
+
+  function finishPreloader(cb) {
+    if (plDone) { if (cb) cb(); return; }
+    plDone = true;
+    pl.classList.add("done");
+    document.documentElement.classList.remove("pl-lock");
+    try { sessionStorage.setItem("antena-intro", "1"); } catch (e) {}
+    setTimeout(function () {
+      pl.style.display = "none";
+      if (cb) cb();
+      onFirstPaint.forEach(function (f) { f(); });
+      onFirstPaint = [];
+    }, reduce ? 0 : 1150);
+  }
+
+  if (reduce || seen) {
+    pl.style.display = "none"; plDone = true;
+    onFirstPaint = [];
+  } else {
+    document.documentElement.classList.add("pl-lock");
+    /* na słabych maszynach intro jest krótsze — mniej klatek animacji i mniej czekania */
+    var p = 0, tw, plStep = P.tier === "lite" ? 17 : 13, plBase = P.tier === "lite" ? 9 : 5;
+    (function tick() {
+      p = Math.min(100, p + Math.random() * plStep + plBase);
+      plBar.style.width = p + "%";
+      plCount.textContent = String(Math.round(p * 2.52)).padStart(3, "0");
+      if (p < 100) tw = setTimeout(tick, 130 + Math.random() * 90);
+      else setTimeout(function () { finishPreloader(); }, 280);
+    })();
+    pl.addEventListener("click", function () { clearTimeout(tw); finishPreloader(); });
+    setTimeout(function () { clearTimeout(tw); finishPreloader(); }, 4200);   // siatka bezpieczeństwa
+  }
+
+  /* =====================================================================
+     2. KURSOR
+     ===================================================================== */
+  var cursorStop = null;
+  if (fx.cursor) {
+    document.documentElement.classList.add("cur-on");
+    var cur = $("#cur"), curDot = $("#curDot");
+    var mx = innerWidth / 2, my = innerHeight / 2, cx = mx, cy = my, dx = mx, dy = my;
+    var curAlive = true;
+
+    addEventListener("mousemove", function (e) {
+      mx = e.clientX; my = e.clientY;
+    }, { passive: true });
+
+    /* jeden dyskretny stan „nad czymś klikalnym" — bez etykiet i bez inwersji koloru */
+    addEventListener("mouseover", function (e) {
+      var t = e.target.closest && e.target.closest("a,button,input,summary,label,[data-cursor],.chip,.row");
+      cur.classList.toggle("hover", !!t);
+    }, { passive: true });
+
+    (function cursorLoop() {
+      if (!curAlive) return;
+      dx += (mx - dx) * 0.65; dy += (my - dy) * 0.65;
+      cx += (mx - cx) * 0.24;  cy += (my - cy) * 0.24;
+      curDot.style.transform = "translate3d(" + dx + "px," + dy + "px,0)";
+      cur.style.transform = "translate3d(" + cx + "px," + cy + "px,0)";
+      requestAnimationFrame(cursorLoop);
+    })();
+
+    cursorStop = function () {
+      curAlive = false;
+      document.documentElement.classList.remove("cur-on");
+      cur.style.display = "none";
+      curDot.style.display = "none";
+    };
+  }
+
+  /* =====================================================================
+     3. PŁYNNE PRZEWIJANIE (wheel-lerp) + KOTWICE
+     ===================================================================== */
+  var smoothOn = fx.smooth;
+  var scrollTarget = window.scrollY, scrollNow = scrollTarget, scrollActive = false;
+  var scrollVel = 0, lastY = window.scrollY;
+
+  function maxScroll() { return document.documentElement.scrollHeight - innerHeight; }
+  function canScrollInside(el, dy) {
+    for (var n = el; n && n !== document.body; n = n.parentElement) {
+      var st = getComputedStyle(n);
+      if ((st.overflowY === "auto" || st.overflowY === "scroll") && n.scrollHeight > n.clientHeight + 1) {
+        if (dy > 0 && n.scrollTop + n.clientHeight < n.scrollHeight - 1) return true;
+        if (dy < 0 && n.scrollTop > 0) return true;
+      }
+    }
+    return false;
+  }
+  function runScroll() {
+    scrollNow += (scrollTarget - scrollNow) * 0.115;
+    if (Math.abs(scrollTarget - scrollNow) < 0.4) { scrollNow = scrollTarget; scrollActive = false; }
+    window.scrollTo(0, scrollNow);
+    if (scrollActive) requestAnimationFrame(runScroll);
+  }
+  function jumpTo(target) {
+    scrollTarget = clamp(target, 0, maxScroll());
+    if (!smoothOn) { window.scrollTo(0, scrollTarget); scrollNow = scrollTarget; return; }
+    if (!scrollActive) { scrollActive = true; requestAnimationFrame(runScroll); }
+  }
+
+  if (smoothOn) {
+    document.documentElement.classList.add("has-smooth");
+    addEventListener("wheel", function (e) {
+      if (e.ctrlKey || e.metaKey) return;
+      if (document.documentElement.classList.contains("menu-open")) return;
+      if (canScrollInside(e.target, e.deltaY)) return;
+      e.preventDefault();
+      var m = e.deltaMode === 1 ? 18 : e.deltaMode === 2 ? innerHeight : 1;
+      scrollTarget = clamp(scrollTarget + e.deltaY * m * 1.08, 0, maxScroll());
+      if (!scrollActive) { scrollActive = true; requestAnimationFrame(runScroll); }
+    }, { passive: false });
+  }
+
+  addEventListener("scroll", function () {
+    var y = window.scrollY;
+    scrollVel = y - lastY;
+    lastY = y;
+    if (smoothOn && !scrollActive) { scrollNow = scrollTarget = y; }
+  }, { passive: true });
+
+  /* kotwice */
+  $$('a[href^="#"]').forEach(function (a) {
+    a.addEventListener("click", function (ev) {
+      var id = a.getAttribute("href");
+      if (id.length < 2) return;
+      var el = document.querySelector(id);
+      if (!el) return;
+      ev.preventDefault();
+      var top = el.getBoundingClientRect().top + window.scrollY - 76;
+      setMenu(false);           /* najpierw zdejmij blokadę przewijania */
+      jumpTo(top);
+      history.replaceState(null, "", id);
+    });
+  });
+
+  /* =====================================================================
+     4. SPLIT TEXT
+     ===================================================================== */
+  function splitWords(el) {
+    if (el.dataset.split === "done") return;
+    el.dataset.split = "done";
+    if (el.classList.contains("grad")) el.classList.add("is-split");
+
+    (function walk(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (k) {
+        if (k.nodeType === 3) {
+          if (!k.textContent.trim()) return;
+          var frag = document.createDocumentFragment();
+          k.textContent.split(/(\s+)/).forEach(function (part) {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+            var mask = document.createElement("span");
+            mask.className = "w";
+            var inner = document.createElement("span");
+            inner.className = "w-i";
+            inner.textContent = part;
+            mask.appendChild(inner);
+            frag.appendChild(mask);
+          });
+          node.replaceChild(frag, k);
+        } else if (k.nodeType === 1 && k.tagName !== "BR") {
+          walk(k);
+        }
+      });
+    })(el);
+
+    $$(".w-i", el).forEach(function (w, i) { w.style.transitionDelay = (i * 0.045).toFixed(3) + "s"; });
+  }
+  if (P.split) $$("[data-split]").forEach(splitWords);
+
+  /* =====================================================================
+     5. ODSŁANIANIE PRZY PRZEWIJANIU (IO + zapasowy sweep)
+     ===================================================================== */
+  var revealables = $$(".reveal");
+  var rollers = $$(".roll");
+  var fills = $$(".bar-fill");
+
+  function reveal(el) {
+    if (el.classList.contains("in")) return;
+    var sibs = Array.prototype.slice.call(el.parentNode.children).filter(function (n) {
+      return n.classList && n.classList.contains("reveal");
+    });
+    var i = Math.max(0, sibs.indexOf(el));
+    el.style.transitionDelay = reduce ? "0ms" : Math.min(i * 80, 400) + "ms";
+    el.classList.add("in");
+  }
+
+  /* rolkowy licznik */
+  function rollUp(el) {
+    if (el.dataset.rolled) return;
+    el.dataset.rolled = "1";
+    var value = String(el.getAttribute("data-count"));
+    if (reduce) { el.textContent = value; return; }
+    el.textContent = "";
+    value.split("").forEach(function (ch, idx) {
+      if (!/\d/.test(ch)) { el.appendChild(document.createTextNode(ch)); return; }
+      var digit = document.createElement("span");
+      digit.className = "o-digit";
+      var strip = document.createElement("span");
+      strip.className = "o-strip";
+      for (var n = 0; n <= 9; n++) {
+        var line = document.createElement("i");
+        line.textContent = String(n);
+        strip.appendChild(line);
+      }
+      digit.appendChild(strip);
+      el.appendChild(digit);
+      setTimeout(function () {
+        strip.style.transitionDelay = (idx * 0.09) + "s";
+        strip.style.transform = "translateY(-" + ch + "em)";
+      }, 60);
+    });
+  }
+
+  function fillBar(el) {
+    if (el.dataset.done) return;
+    el.dataset.done = "1";
+    setTimeout(function () { el.style.width = el.getAttribute("data-w") + "%"; }, 140);
+  }
+
+  function inView(el, m) {
+    var r = el.getBoundingClientRect();
+    var vh = innerHeight || document.documentElement.clientHeight;
+    return r.bottom > -(m || 0) && r.top < vh * 0.92;
+  }
+
+  function sweep() {
+    revealables.forEach(function (el) { if (!el.classList.contains("in") && inView(el)) reveal(el); });
+    rollers.forEach(function (el) { if (!el.dataset.rolled && inView(el, 40)) rollUp(el); });
+    fills.forEach(function (el) { if (!el.dataset.done && inView(el, -60)) fillBar(el); });
+  }
+
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { reveal(e.target); io.unobserve(e.target); } });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    revealables.forEach(function (el) { io.observe(el); });
+  }
+
+  var sweepQueued = false;
+  function queueSweep() {
+    if (sweepQueued) return;
+    sweepQueued = true;
+    requestAnimationFrame(function () { sweep(); sweepQueued = false; });
+  }
+  addEventListener("scroll", queueSweep, { passive: true });
+  addEventListener("resize", queueSweep, { passive: true });
+  addEventListener("load", sweep);
+  if (plDone) sweep();
+  else onFirstPaint.push(sweep);
+  setTimeout(function () {
+    revealables.forEach(reveal); rollers.forEach(rollUp); fills.forEach(fillBar);
+  }, 4500);
+
+  /* =====================================================================
+     6. PASEK POSTĘPU, NAWIGACJA, „NA GÓRĘ"
+     ===================================================================== */
+  var bar = $("#progress"), nav = $("#nav"), toTop = $("#toTop");
+  var lastNavY = 0, raf = false;
+  function onFrame() {
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    var p = max > 0 ? h.scrollTop / max : 0;
+    bar.style.width = (p * 100) + "%";
+    nav.classList.toggle("stuck", h.scrollTop > 12);
+    toTop.classList.toggle("on", h.scrollTop > 700);
+    if (!reduce) {
+      nav.classList.toggle("hide", h.scrollTop > 480 && h.scrollTop > lastNavY);
+      lastNavY = h.scrollTop;
+    }
+    if (smoothOn && !scrollActive) { scrollNow = scrollTarget = h.scrollTop; }
+    raf = false;
+  }
+  addEventListener("scroll", function () { if (!raf) { raf = true; requestAnimationFrame(onFrame); } }, { passive: true });
+  onFrame();
+  toTop.addEventListener("click", function () { jumpTo(0); });
+
+  /* =====================================================================
+     7. MENU PEŁNOEKRANOWE
+     ===================================================================== */
+  var burger = $("#burger"), menu = $("#menu"), menuClose = $("#menuClose");
+  var lastFocus = null;
+
+  function setMenu(open) {
+    if (!menu) return;
+    if (menu.classList.contains("open") === open) return;
+    menu.classList.toggle("open", open);
+    menu.setAttribute("aria-hidden", String(!open));
+    burger.setAttribute("aria-expanded", String(open));
+    burger.setAttribute("aria-label", open ? "Zamknij menu" : "Otwórz menu");
+    document.documentElement.classList.toggle("menu-open", open);
+    /* kompensacja znikającego paska przewijania — bez tego treść „przeskakuje" */
+    var sbw = window.innerWidth - document.documentElement.clientWidth;
+    document.documentElement.style.setProperty("--sbw", (open && sbw > 0 ? sbw : 0) + "px");
+    if (open) {
+      lastFocus = document.activeElement;
+      /* fokus po animacji odsłaniania, żeby nie „skakał" w trakcie */
+      setTimeout(function () {
+        if (menu.classList.contains("open")) menuClose.focus({ preventScroll: true });
+      }, reduce ? 0 : 320);
+    } else if (lastFocus && lastFocus.focus) {
+      lastFocus.focus({ preventScroll: true });
+      lastFocus = null;
+    }
+  }
+
+  if (burger && menu) {
+    burger.addEventListener("click", function () { setMenu(!menu.classList.contains("open")); });
+    menuClose.addEventListener("click", function () { setMenu(false); });
+
+    /* klik w tło (poza treścią menu) zamyka */
+    menu.addEventListener("click", function (e) {
+      if (e.target === menu) setMenu(false);
+    });
+
+    addEventListener("keydown", function (e) {
+      if (!menu.classList.contains("open")) return;
+      if (e.key === "Escape" || e.key === "Esc") {
+        e.stopImmediatePropagation();   /* nie pozwól, by skrót dotarł do podglądu aplikacji */
+        setMenu(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      /* prosta pułapka fokusu — menu jest pełnoekranowe, więc tab ma w nim zostać */
+      var f = $$("a[href],button:not([disabled])", menu).filter(function (el) {
+        return el.offsetParent !== null || el === menuClose;
+      });
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  }
+
+  /* podświetlanie sekcji, w której właśnie jesteśmy */
+  var spyLinks = $$(".menu-link");
+  if (spyLinks.length && "IntersectionObserver" in window) {
+    var byId = {};
+    spyLinks.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+    var spy = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var a = byId[e.target.id];
+        if (!a || !e.isIntersecting) return;
+        spyLinks.forEach(function (x) { x.classList.remove("active"); });
+        a.classList.add("active");
+      });
+    }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+    Object.keys(byId).forEach(function (id) {
+      var s = document.getElementById(id);
+      if (s) spy.observe(s);
+    });
+  }
+
+  /* =====================================================================
+     8. PARALLAX / SPOTLIGHT / TILT 3D / MAGNES
+     ===================================================================== */
+  var blobs = $$("[data-parallax]");
+  var heroSpot = $("#heroSpot"), hero = $(".hero");
+  var tilts = $$("[data-tilt]");
+  var magnets = $$("[data-magnet]");
+
+  if (fx.parallax) {
+    addEventListener("mousemove", function (e) {
+      if (!fx.parallax) return;
+      var nx = e.clientX / innerWidth - 0.5;
+      var ny = e.clientY / innerHeight - 0.5;
+      blobs.forEach(function (b) {
+        var k = parseFloat(b.getAttribute("data-parallax")) * 70;
+        b.style.transform = "translate3d(" + (nx * k).toFixed(1) + "px," + (ny * k).toFixed(1) + "px,0)";
+      });
+      if (heroSpot && hero) {
+        var r = hero.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < innerHeight) {
+          heroSpot.style.setProperty("--mx", (e.clientX - r.left) + "px");
+          heroSpot.style.setProperty("--my", (e.clientY - r.top) + "px");
+        }
+      }
+    }, { passive: true });
+  }
+
+  /* spotlight kart */
+  $$("[data-spotlight]").forEach(function (card) {
+    card.addEventListener("mousemove", function (e) {
+      var r = card.getBoundingClientRect();
+      card.style.setProperty("--mx", (e.clientX - r.left) + "px");
+      card.style.setProperty("--my", (e.clientY - r.top) + "px");
+    }, { passive: true });
+  });
+
+  /* obracająca się obwódka kafelka wsparcia — animujemy tylko, gdy jest na ekranie
+     (w innym wypadku to nieustanne przemalowywanie dużego gradientu) */
+  var supBox = $(".support");
+  if (supBox && !reduce && "IntersectionObserver" in window) {
+    new IntersectionObserver(function (es) {
+      es.forEach(function (e) { supBox.classList.toggle("on", e.isIntersecting); });
+    }, { threshold: 0 }).observe(supBox);
+  } else if (supBox) {
+    supBox.classList.add("on");
+  }
+
+  /* obserwator widoczności — animacje startują, gdy element pojawia się na ekranie */
+  function watchVisible(el, cb) {
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) cb(el); });
+      }, { threshold: 0.01 }).observe(el);
+    } else { cb(el); }
+  }
+
+  /* tilt 3D — pętla sama się zatrzymuje, gdy nie ma czego animować */
+  if (fx.tilt) {
+    tilts.forEach(function (el) {
+      var max = parseFloat(el.getAttribute("data-tilt-max") || 6) * 0.55;
+      var stage = el.querySelector(".mock-stage") || el;
+      var rx = 0, ry = 0, trx = 0, tryy = 0, active = false, running = false;
+
+      function ensure() { if (fx.tilt && !running) { running = true; requestAnimationFrame(loop); } }
+      function loop() {
+        rx += (trx - rx) * 0.09; ry += (tryy - ry) * 0.09;
+        var settled = Math.abs(rx - trx) < 0.01 && Math.abs(ry - tryy) < 0.01;
+        if (settled) { rx = trx; ry = tryy; }
+        stage.style.transform = "rotateX(" + rx.toFixed(3) + "deg) rotateY(" + ry.toFixed(3) + "deg)";
+        if (settled && !active) { running = false; return; }
+        requestAnimationFrame(loop);
+      }
+
+      el.addEventListener("mouseenter", function () { if (!fx.tilt) return; active = true; ensure(); });
+      el.addEventListener("mouseleave", function () {
+        if (!fx.tilt) return;
+        active = false; trx = 0; tryy = 0; ensure();
+      });
+      el.addEventListener("mousemove", function (e) {
+        if (!fx.tilt) return;
+        var r = el.getBoundingClientRect();
+        trx = -((e.clientY - r.top) / r.height - 0.5) * max;
+        tryy = ((e.clientX - r.left) / r.width - 0.5) * max;
+        ensure();
+      }, { passive: true });
+      watchVisible(el, ensure);
+    });
+  }
+
+  /* magnetyczne przyciski — budzą się dopiero pod kursorem */
+  if (fx.magnet) {
+    magnets.forEach(function (el) {
+      var s = parseFloat(el.getAttribute("data-magnet")) * 14;
+      var x = 0, y = 0, tx = 0, ty = 0, running = false;
+
+      function loop() {
+        x += (tx - x) * 0.14; y += (ty - y) * 0.14;
+        var settled = Math.abs(x - tx) < 0.05 && Math.abs(y - ty) < 0.05;
+        if (settled) { x = tx; y = ty; }
+        el.style.transform = (Math.abs(x) > 0.05 || Math.abs(y) > 0.05)
+          ? "translate3d(" + x.toFixed(2) + "px," + y.toFixed(2) + "px,0)" : "";
+        if (settled) { running = false; return; }
+        requestAnimationFrame(loop);
+      }
+      function ensure() { if (fx.magnet && !running) { running = true; requestAnimationFrame(loop); } }
+
+      el.addEventListener("mousemove", function (e) {
+        if (!fx.magnet) return;
+        var r = el.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width - 0.5) * s;
+        ty = ((e.clientY - r.top) / r.height - 0.5) * s * 0.6;
+        ensure();
+      }, { passive: true });
+      el.addEventListener("mouseleave", function () {
+        if (!fx.magnet) return;
+        tx = 0; ty = 0; ensure();
+      });
+    });
+  }
+
+  /* =====================================================================
+     9. CANVAS — fale radiowe w hero
+     ===================================================================== */
+  var canvasResize = null;
+  (function waves() {
+    var cv = $("#waveCanvas");
+    if (!cv || reduce) return;
+    var ctx = cv.getContext("2d");
+    var w = 0, h = 0;
+    var live = false, t = 0, energy = 0.18, mouseX = 0.5, running = true;
+    var lastDraw = 0;
+
+    function resizeCanvas() {
+      var r = cv.parentElement.getBoundingClientRect();
+      w = r.width; h = r.height;
+      var dpr = Math.min(devicePixelRatio || 1, P.dpr);   /* mniej pikseli = tańsze malowanie */
+      cv.width = Math.max(1, Math.round(w * dpr));
+      cv.height = Math.max(1, Math.round(h * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resizeCanvas();
+    canvasResize = resizeCanvas;
+    addEventListener("resize", resizeCanvas, { passive: true });
+
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) { running = e.isIntersecting; });
+      }, { threshold: 0 }).observe(cv);
+    }
+    document.addEventListener("visibilitychange", function () { running = !document.hidden; });
+
+    if (fine) addEventListener("mousemove", function (e) { mouseX = e.clientX / innerWidth; }, { passive: true });
+    addEventListener("antena:play", function (e) { live = e.detail; });
+
+    var layers = [
+      { amp: 54, len: 0.0052, speed: 0.6, col: "rgba(240,180,65,.55)", col2: "rgba(255,214,138,.9)", wdt: 1.5, y: 0.74 },
+      { amp: 42, len: 0.0074, speed: 0.9, col: "rgba(255,138,61,.4)",  col2: "rgba(255,138,61,.75)", wdt: 1.3, y: 0.82 },
+      { amp: 32, len: 0.0105, speed: 1.3, col: "rgba(139,124,246,.34)", col2: "rgba(139,124,246,.6)", wdt: 1.1, y: 0.9 }
+    ];
+
+    function wavePath(L, li, step) {
+      ctx.beginPath();
+      var yBase = h * L.y;
+      for (var x = 0; x <= w; x += step) {
+        var falloff = Math.pow(Math.sin(Math.PI * x / w), 0.6);
+        var pull = 1 + 0.9 * Math.exp(-Math.pow((x / w - mouseX) * 3.2, 2));
+        var y = yBase
+          + Math.sin(x * L.len + t * L.speed) * L.amp * energy * falloff * pull
+          + Math.sin(x * L.len * 2.7 + t * L.speed * 1.7 + li) * L.amp * 0.28 * energy * falloff;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+    }
+
+    (function frame(ts) {
+      requestAnimationFrame(frame);
+      if (!running) return;
+      var min = 1000 / P.canvasFps;
+      if (ts && ts - lastDraw < min - 1) return;    /* słabszy sprzęt rysuje rzadziej, nie mniej ładnie */
+      lastDraw = ts || 0;
+
+      t += 0.016;
+      energy += ((live ? 0.85 : 0.18) - energy) * 0.05;
+      ctx.clearRect(0, 0, w, h);
+
+      var n = Math.min(layers.length, P.layers);
+      var step = P.tier === "lite" ? 10 : 6;
+      var glow = P.tier !== "lite";
+
+      for (var li = 0; li < n; li++) {
+        var L = layers[li];
+        if (glow) {
+          /* szeroka poświata + cienka, jaśniejsza linia */
+          ctx.lineWidth = L.wdt * 7;
+          ctx.strokeStyle = L.col;
+          ctx.globalAlpha = 0.28;
+          wavePath(L, li, step); ctx.stroke();
+        }
+        ctx.lineWidth = L.wdt;
+        ctx.strokeStyle = L.col2;
+        ctx.globalAlpha = 0.75;
+        wavePath(L, li, step); ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      /* drobne „widmo" przy dolnej krawędzi */
+      var bars = P.bars, bw = w / bars;
+      for (var i = 0; i < bars; i++) {
+        var phase = t * 2.2 + i * 0.42;
+        var mag = (Math.sin(phase) * 0.5 + 0.5) * (0.42 + energy);
+        var bh = 5 + mag * 44 * energy;
+        ctx.fillStyle = "rgba(240,180,65," + (0.1 + mag * 0.3).toFixed(3) + ")";
+        ctx.fillRect(i * bw + bw * 0.3, h - bh, bw * 0.4, bh);
+      }
+    })(0);
+  })();
+
+  /* =====================================================================
+     10. MARQUEE + WIELKI PAS (prędkość zależy od scrolla)
+     ===================================================================== */
+  function buildMarquee(el, items, reverse) {
+    var half = document.createElement("span");
+    items.forEach(function (tx, i) {
+      if (i) { var dot = document.createElement("i"); half.appendChild(dot); }
+      half.appendChild(document.createTextNode(tx));
+    });
+    el.appendChild(half);
+    el.appendChild(half.cloneNode(true));
+    return half.getBoundingClientRect().width || 900;
+  }
+
+  var tickerEl = $("#tickerTrack");
+  var stationNames = [
+    "Chilli Zet","RMF FM","Radio 357","Radio Nowy Świat","TOK FM","Antyradio","Eska Rock",
+    "Radio Kampus","SomaFM Groove Salad","FIP","Café del Mar","Radio Paradise","NTS",
+    "Deutschlandfunk","Radio Swiss Pop","Venice Classic","Smooth Jazz Lounge","Megarock Radio"
+  ];
+  var tickerW = buildMarquee(tickerEl, stationNames, false);
+
+  var bandA = $("#bandA"), bandB = $("#bandB");
+  var phrases = ["252 STACJE", "30 GATUNKÓW", "ZERO REKLAM", "~4% CPU", "3,3 MB", "METADANE ICY", "OPEN SOURCE"];
+  var phrases2 = ["LEKKIE RADIO", "WINDOWS + LINUX", "BEZ KONT", "BEZ CHMURY", "TAURI 2", "RUST", "ULUBIONE"];
+  function buildBand(el, arr, filled) {
+    var half = document.createElement("span");
+    half.style.display = "inline-flex";
+    half.style.alignItems = "center";
+    half.style.gap = "inherit";
+    arr.concat(arr).forEach(function (tx) {
+      var b = document.createElement("b");
+      if (filled) b.className = "fill";
+      b.textContent = tx;
+      half.appendChild(b);
+      var s = document.createElement("s");
+      half.appendChild(s);
+    });
+    el.appendChild(half);
+    el.appendChild(half.cloneNode(true));
+    return half;
+  }
+  var bandAHalf = buildBand(bandA, phrases, false);
+  var bandBHalf = buildBand(bandB, phrases2, true);
+
+  var bandAw = bandAHalf.getBoundingClientRect().width || 1400;
+  var bandBw = bandBHalf.getBoundingClientRect().width || 1400;
+  var mx1 = 0, bandApos = 0, bandBpos = -bandBw;
+
+  function measure() {
+    tickerW = tickerEl.firstElementChild.getBoundingClientRect().width || tickerW;
+    bandAw = bandAHalf.getBoundingClientRect().width || bandAw;
+    bandBw = bandBHalf.getBoundingClientRect().width || bandBw;
+  }
+  addEventListener("resize", measure, { passive: true });
+  addEventListener("load", measure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+
+  if (!reduce) {
+    var mqOn = true;   /* fail-open: pętla działa, dopóki obserwator nie powie inaczej */
+    var mqLast = 0;
+    (function marqueeLoop(ts) {
+      requestAnimationFrame(marqueeLoop);
+      /* pętla nic nie liczy, gdy pasy są poza ekranem — oszczędzamy CPU */
+      if (!mqOn) { scrollVel = 0; return; }
+      /* na słabszych maszynach pasy przesuwają się rzadziej, ale tak samo płynnie dla oka */
+      if (ts && ts - mqLast < (1000 / P.mqFps) - 1) return;
+      mqLast = ts || 0;
+
+      var boost = Math.min(9, Math.abs(scrollVel) * 0.55);
+      scrollVel *= 0.92;
+
+      mx1 -= 0.55 + boost * 0.5;
+      if (mx1 <= -tickerW) mx1 += tickerW;
+      tickerEl.style.transform = "translate3d(" + mx1.toFixed(2) + "px,0,0)";
+
+      bandApos -= (0.7 + boost * 0.35) * bandAw / 1400;
+      if (bandApos <= -bandAw) bandApos += bandAw;
+      bandA.style.transform = "translate3d(" + bandApos.toFixed(2) + "px,0,0)";
+
+      bandBpos += (0.9 + boost * 0.4) * bandBw / 1400;
+      if (bandBpos >= 0) bandBpos -= bandBw;
+      bandB.style.transform = "translate3d(" + bandBpos.toFixed(2) + "px,0,0)";
+    })();
+
+    if ("IntersectionObserver" in window) {
+      var near = { ticker: true, band: true };
+      var mqIO = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.target === tickerEl.parentElement) near.ticker = e.isIntersecting;
+          else near.band = e.isIntersecting;
+        });
+        mqOn = near.ticker || near.band;
+      }, { threshold: 0 });
+      mqIO.observe(tickerEl.parentElement);
+      mqIO.observe(bandA);
+    } else { mqOn = true; }
+  }
+
+  /* =====================================================================
+     11. ZAKŁADKI INSTALACJI + KOPIOWANIE
+     ===================================================================== */
+  var tabs = $$(".tab"), tabPill = $("#tabPill");
+  function movePill() {
+    var active = tabs.filter(function (t) { return t.getAttribute("aria-selected") === "true"; })[0] || tabs[0];
+    tabPill.style.width = active.offsetWidth + "px";
+    tabPill.style.transform = "translateX(" + active.offsetLeft + "px)";
+  }
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      tabs.forEach(function (t) { t.setAttribute("aria-selected", String(t === tab)); });
+      $$(".panel").forEach(function (p) {
+        p.classList.toggle("on", p.getAttribute("data-panel") === tab.getAttribute("data-tab"));
+      });
+      movePill();
+    });
+  });
+  movePill();
+  addEventListener("resize", function () { setTimeout(movePill, 120); }, { passive: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(movePill);
+
+  var toast = $("#toast"), toastT;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toast.classList.remove("show"); }, 2200);
+  }
+  $$(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.closest(".cmd").getAttribute("data-copy") || "";
+      var settled = false;
+
+      function ok() {
+        if (settled) return; settled = true;
+        btn.classList.add("done");
+        showToast("Skopiowane do schowka");
+        setTimeout(function () { btn.classList.remove("done"); }, 1600);
+      }
+      function bad() {
+        if (settled) return; settled = true;
+        showToast("Nie udało się skopiować — zaznacz i skopiuj ręcznie");
+      }
+      function legacy() {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.cssText = "position:fixed;top:-1000px;opacity:0";
+        document.body.appendChild(ta);
+        ta.select();
+        var okDone = false;
+        try { okDone = document.execCommand("copy"); } catch (e) { okDone = false; }
+        document.body.removeChild(ta);
+        return okDone;
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, function () { legacy() ? ok() : bad(); });
+        /* awaryjnie: gdy przeglądarka nie odpowiada w rozsądnym czasie */
+        setTimeout(function () { if (!settled) { legacy() ? ok() : bad(); } }, 1200);
+      } else {
+        legacy() ? ok() : bad();
+      }
+    });
+  });
+
+  /* =====================================================================
+     12. AKORDEON FAQ (animowana wysokość, bez zależności od rAF)
+     ===================================================================== */
+  $$(".faq details").forEach(function (det) {
+    var body = $(".body", det);
+    if (!body) return;
+
+    /* padding przenosimy do środka, żeby animacja wysokości nie zostawiała luki */
+    var inner = document.createElement("div");
+    inner.innerHTML = body.innerHTML;
+    body.innerHTML = "";
+    body.appendChild(inner);
+    var pad = getComputedStyle(body).padding;
+    body.style.padding = "0";
+    inner.style.padding = pad;
+
+    body.style.overflow = "hidden";
+    body.style.transition = "height .55s cubic-bezier(.16,1,.3,1),opacity .45s";
+    /* stan początkowy bez animacji */
+    body.style.height = det.open ? "auto" : "0px";
+    body.style.opacity = det.open ? "1" : "0";
+
+    function setOpen() {
+      clearTimeout(det._ft);
+      body.style.height = "0px";
+      void body.offsetHeight;                       /* wymuszamy reflow — od tego miejsca startuje animacja */
+      body.style.height = inner.offsetHeight + "px";
+      body.style.opacity = "1";
+      /* stan końcowy zawsze poprawny, nawet gdyby przejście się nie wykonało */
+      det._ft = setTimeout(function () { body.style.height = "auto"; }, 620);
+    }
+    function setClosed() {
+      clearTimeout(det._ft);
+      body.style.height = inner.offsetHeight + "px";
+      void body.offsetHeight;
+      body.style.height = "0px";
+      body.style.opacity = "0";
+      det._ft = setTimeout(function () { if (!det.open) body.style.height = "0px"; }, 620);
+    }
+
+    det.addEventListener("toggle", function () { det.open ? setOpen() : setClosed(); });
+  });
+
+  /* =====================================================================
+     13. PARALLAX STOPKI
+     ===================================================================== */
+  var giant = $("#giant");
+  if (giant && !reduce) {
+    var gq = false;
+    function giantFrame() {
+      var r = giant.getBoundingClientRect();
+      var p = 1 - clamp(r.top / innerHeight, 0, 1);
+      giant.style.transform = "translate3d(" + ((p - 0.5) * -90).toFixed(1) + "px,0,0)";
+      gq = false;
+    }
+    addEventListener("scroll", function () { if (!gq) { gq = true; requestAnimationFrame(giantFrame); } }, { passive: true });
+    giantFrame();
+  }
+
+  /* =====================================================================
+     14. INTERAKTYWNA MAKIETA — realne strumienie, filtry, ulubione
+     ===================================================================== */
+  var STATIONS = [
+    { n:"Chilli Zet",                     g:"Chillout",       k:"MP3",  b:128, c:"PL", u:"https://ch.cdn.eurozet.pl/chi-net.mp3" },
+    { n:"RMF FM",                         g:"Pop",            k:"MP3",  b:128, c:"PL", u:"https://rs201-krk.rmfstream.pl/rmf_fm" },
+    { n:"ZET",                            g:"Pop",            k:"MP3",  b:128, c:"PL", u:"https://r.dcs.redcdn.pl/sc/o2/Eurozet/live/audio.livx?audio=5" },
+    { n:"Antyradio",                      g:"Rock",           k:"MP3",  b:128, c:"PL", u:"https://n-4-2.dcs.redcdn.pl/sc/o2/Eurozet/live/antyradio.livx?audio=5" },
+    { n:"ESKA ROCK",                      g:"Rock",           k:"MP3",  b:128, c:"PL", u:"https://ic2.smcdn.pl/5380-1.mp3" },
+    { n:"Radio 357",                      g:"Kultura",        k:"AAC",  b:128, c:"PL", u:"https://n-11-21.dcs.redcdn.pl/sc/o2/radio357/live/radio357_pr.livx?preroll=0" },
+    { n:"Radio Nowy Świat",               g:"Kultura",        k:"MP3",  b:256, c:"PL", u:"https://go-audio.toya.net.pl/63214" },
+    { n:"TOK FM",                         g:"Wiadomości",     k:"MP3",  b:128, c:"PL", u:"https://radiostream.pl/tuba10-1.mp3" },
+    { n:"Wnet.fm",                        g:"Wiadomości",     k:"MP3",  b:128, c:"PL", u:"https://media.wnet.fm/wnet.fm" },
+    { n:"Republika",                      g:"Wiadomości",     k:"MP3",  b:128, c:"PL", u:"https://ssl-1.radiotvrepublika.pl:12698/stream" },
+    { n:"Radio Kampus",                   g:"Studenckie",     k:"MP3",  b:128, c:"PL", u:"https://stream.radiokampus.fm/kampus" },
+    { n:"VOX FM",                         g:"Dance",          k:"MP3",  b:128, c:"PL", u:"https://ic2.smcdn.pl/3990-1.mp3" },
+    { n:"RMF Dance",                      g:"Dance",          k:"MP3",  b:128, c:"PL", u:"https://rs203-krk-cyfronet.rmfstream.pl/rmf_dance" },
+    { n:"RMF MAXXX",                      g:"Pop",            k:"AAC+", b:48,  c:"PL", u:"https://rs9-krk2-cyfronet.rmfstream.pl/RMFMAXXX48" },
+    { n:"Mirage - Italo Dance",           g:"Dance",          k:"MP3",  b:320, c:"PL", u:"https://ssl-1.radiohost.pl:9569/stream" },
+    { n:"ESKA - Gorąca",                  g:"Pop",            k:"MP3",  b:128, c:"PL", u:"https://waw.ic.smcdn.pl/6130-1.mp3" },
+    { n:"ESKA - Do Pracy",                g:"Pop",            k:"MP3",  b:128, c:"PL", u:"https://waw.ic.smcdn.pl/6140-1.mp3" },
+    { n:"ESKA - Summer City",             g:"Dance",          k:"MP3",  b:128, c:"PL", u:"https://waw.ic.smcdn.pl/6120-1.mp3" },
+    { n:"RadioFEST",                      g:"Pop",            k:"MP3",  b:128, c:"PL", u:"https://play.radiofest.pl:8443/fest" },
+    { n:"Złote Przeboje",                 g:"Oldies",         k:"MP3",  b:128, c:"PL", u:"https://radiostream.pl/tuba9-1.mp3" },
+    { n:"SmoothJazz.com.pl 320k MP3",     g:"Jazz",           k:"MP3",  b:320, c:"PL", u:"https://bcast.vigormultimedia.com:48888/sjcompl320mp3" },
+    { n:"Antyradio Classic Rock",         g:"Rock",           k:"MP3",  b:128, c:"PL", u:"https://an01.cdn.eurozet.pl/ANTCLA.mp3?redirected=01" },
+    { n:"Radio Paradise",                 g:"Rock",           k:"MP3",  b:192, c:"US", u:"https://stream.radioparadise.com/mp3-192" },
+    { n:"SomaFM Groove Salad",            g:"Ambient",        k:"MP3",  b:128, c:"US", u:"https://ice1.somafm.com/groovesalad-128-mp3" },
+    { n:"SomaFM Drone Zone",              g:"Ambient",        k:"MP3",  b:128, c:"US", u:"https://ice1.somafm.com/dronezone-128-mp3" },
+    { n:"SomaFM Space Station",           g:"Ambient",        k:"MP3",  b:128, c:"US", u:"https://ice1.somafm.com/spacestation-128-mp3" },
+    { n:"SomaFM Lush",                    g:"Chillout",       k:"MP3",  b:128, c:"US", u:"https://ice1.somafm.com/lush-128-mp3" },
+    { n:"SomaFM Indie Pop Rocks",         g:"Indie",          k:"MP3",  b:128, c:"US", u:"https://ice1.somafm.com/indiepop-128-mp3" },
+    { n:"SomaFM Underground 80s",         g:"Lata 80",        k:"MP3",  b:128, c:"US", u:"https://ice1.somafm.com/u80s-128-mp3" },
+    { n:"SomaFM Secret Agent",            g:"Lounge",         k:"MP3",  b:128, c:"US", u:"https://ice1.somafm.com/secretagent-128-mp3" },
+    { n:"SomaFM Metal Detector",          g:"Metal",          k:"MP3",  b:128, c:"US", u:"https://ice1.somafm.com/metal-128-mp3" },
+    { n:"FIP",                            g:"Jazz",           k:"MP3",  b:128, c:"FR", u:"https://icecast.radiofrance.fr/fip-midfi.mp3" },
+    { n:"FIP Reggae",                     g:"Reggae",         k:"AAC",  b:192, c:"FR", u:"https://icecast.radiofrance.fr/fipreggae-hifi.aac" },
+    { n:"Heart 80s",                      g:"Pop",            k:"MP3",  b:128, c:"GB", u:"https://media-ssl.musicradio.com/Heart80sMP3" },
+    { n:"Gold",                           g:"Oldies",         k:"MP3",  b:128, c:"GB", u:"https://media-ssl.musicradio.com/GoldMP3" },
+    { n:"Smooth Chill",                   g:"Chillout",       k:"MP3",  b:128, c:"GB", u:"https://media-ssl.musicradio.com/ChillMP3" },
+    { n:"Café del Mar",                   g:"Chillout",       k:"MP3",  b:128, c:"ES", u:"https://streams.radio.co/se1a320b47/listen" },
+    { n:"LOS 40 Principales España",      g:"Pop",            k:"MP3",  b:128, c:"ES", u:"https://playerservices.streamtheworld.com/api/livestream-redirect/Los40.mp3" },
+    { n:"Dance Wave!",                    g:"Elektronika",    k:"MP3",  b:128, c:"HU", u:"https://dancewave.online/dance.mp3" },
+    { n:"Retro Rádió",                    g:"Retro",          k:"MP3",  b:128, c:"HU", u:"https://icast.connectmedia.hu/5001/live.mp3" },
+    { n:"181.FM - The Beat",              g:"Hip-Hop",        k:"MP3",  b:128, c:"US", u:"https://listen.181fm.com/181-beat_128k.mp3" },
+    { n:"181.FM - Kickin' Country",       g:"Country",        k:"MP3",  b:128, c:"US", u:"https://listen.181fm.com/181-kickincountry_128k.mp3" },
+    { n:"- 0 N - 80s on Radio",           g:"Oldies",         k:"MP3",  b:128, c:"DE", u:"https://0n-80s.radionetz.de/0n-80s.mp3" },
+    { n:"- 0 N - Indie on Radio",         g:"Indie",          k:"MP3",  b:128, c:"DE", u:"https://0n-indie.radionetz.de/0n-indie.mp3" },
+    { n:"Megarock Radio 320k",            g:"Metal",          k:"MP3",  b:320, c:"US", u:"https://stream3.megarockradio.net:80/" },
+    { n:"REGGAE CHILL CAFE",              g:"Reggae",         k:"MP3",  b:128, c:"CA", u:"https://maggie.torontocast.com:2020/stream/reggaechillcafe" },
+    { n:"Olímpica Stereo (Medellín)",     g:"Latino",         k:"AAC+", b:128, c:"CO", u:"https://playerservices.streamtheworld.com/api/livestream-redirect/OLP_MEDELLINAAC.aac" },
+    { n:"Exclusively Iron Maiden",        g:"Metal",          k:"MP3",  b:128, c:"AE", u:"https://streaming.exclusive.radio/er/ironmaiden/icecast.audio" },
+    { n:"Instrumental Jazz",              g:"Instrumentalna", k:"MP3",  b:128, c:"RU", u:"https://jfm1.hostingradio.ru:14536/ijstream.mp3" },
+    { n:"Smooth Jazz Lounge",             g:"Lounge",         k:"MP3",  b:128, c:"BR", u:"https://radio4.vip-radios.fm:18060/stream-128kmp3-SmoothJazzLounge" },
+    { n:"FUNKY RADIO",                    g:"Soul/Funk",      k:"MP3",  b:128, c:"US", u:"https://funkyradio.streamingmedia.it/play.mp3" },
+    { n:"Mosaique FM",                    g:"Klasyczna",      k:"MP3",  b:128, c:"TN", u:"https://radio.mosaiquefm.net/mosalive" }
+  ];
+
+  var audio    = $("#mockAudio"),
+      listEl   = $("#mockList"),
+      chipsEl  = $("#mockChips"),
+      searchEl = $("#mockSearch"),
+      titleEl  = $("#mockTitle"),
+      subEl    = $("#mockSub"),
+      stateEl  = $("#mockState"),
+      countEl  = $("#mockCount"),
+      eqEl     = $("#mockEq"),
+      playBtn  = $("#mockPlay"),
+      playIcon = $("#playIcon"),
+      muteBtn  = $("#mockMute"),
+      volEl    = $("#mockVol");
+
+  var genre = "all", query = "", favorites = {}, current = null, playing = false, muted = false, lastVolume = 0.8;
+  try { favorites = JSON.parse(localStorage.getItem("antena-favs") || "{}") || {}; } catch (e) { favorites = {}; }
+
+  var counts = {};
+  STATIONS.forEach(function (s) { counts[s.g] = (counts[s.g] || 0) + 1; });
+  var genres = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
+  var favCount = function () { return Object.keys(favorites).filter(function (k) { return favorites[k]; }).length; };
+
+  function chip(label, value, active) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip" + (active ? " on" : "");
+    b.textContent = label;
+    b.addEventListener("click", function () { genre = value; renderChips(); render(); });
+    return b;
+  }
+  function renderChips() {
+    chipsEl.innerHTML = "";
+    chipsEl.appendChild(chip("Losowa", "random", genre === "random"));
+    chipsEl.appendChild(chip("★ Ulubione (" + favCount() + ")", "fav", genre === "fav"));
+    chipsEl.appendChild(chip("Wszystkie (" + STATIONS.length + ")", "all", genre === "all"));
+    genres.forEach(function (g) { chipsEl.appendChild(chip(g + " (" + counts[g] + ")", g, genre === g)); });
+  }
+
+  function visible() {
+    var q = query.trim().toLowerCase();
+    return STATIONS.filter(function (s) {
+      if (genre === "fav" && !favorites[s.n]) return false;
+      if (genre !== "all" && genre !== "fav" && genre !== "random" && s.g !== genre) return false;
+      if (!q) return true;
+      return (s.n + " " + s.g + " " + s.c + " " + s.k).toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  function row(s) {
+    var li = document.createElement("li");
+    li.className = "row" + (current === s ? " playing" : "") + (s.dead ? " dead" : "");
+    li.innerHTML =
+      '<span class="row-tog"></span><span class="row-name"></span><span class="row-meta"></span>' +
+      '<button class="star' + (favorites[s.n] ? " on" : "") + '" type="button" aria-label="Ulubione">' +
+      '<svg viewBox="0 0 24 24"><path d="m12 3.6 2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.8l5.9-.8z"/></svg></button>';
+    $(".row-name", li).textContent = s.n;
+    $(".row-meta", li).textContent = s.g + " · " + s.k + " " + s.b + " · " + s.c;
+    li.addEventListener("click", function () { playStation(s); });
+    $(".star", li).addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      favorites[s.n] = !favorites[s.n];
+      if (!favorites[s.n]) delete favorites[s.n];
+      try { localStorage.setItem("antena-favs", JSON.stringify(favorites)); } catch (e) {}
+      renderChips(); render();
+    });
+    return li;
+  }
+
+  function render() {
+    var items = visible();
+    listEl.innerHTML = "";
+    items.forEach(function (s) { listEl.appendChild(row(s)); });
+    if (!items.length) {
+      var li = document.createElement("li");
+      li.style.cssText = "padding:26px 14px;text-align:center;color:var(--dim);font-size:13.5px";
+      li.textContent = "Nic nie znaleziono.";
+      listEl.appendChild(li);
+    }
+    countEl.textContent = items.length + " z " + STATIONS.length;
+  }
+
+  function setPlaying(on) {
+    playing = on;
+    eqEl.classList.toggle("on", on);
+    playIcon.innerHTML = on ? '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+    dispatchEvent(new CustomEvent("antena:play", { detail: on }));
+  }
+
+  function playStation(s) {
+    current = s; s.dead = false;
+    titleEl.textContent = s.n; titleEl.classList.remove("dead");
+    subEl.textContent = s.g + " · " + s.k + " " + s.b + " · " + s.c;
+    stateEl.classList.remove("err"); stateEl.textContent = "Łączenie…";
+    render();
+    audio.src = s.u;
+    audio.volume = muted ? 0 : lastVolume;
+    var p = audio.play();
+    if (p && p.catch) {
+      p.then(function () { setPlaying(true); stateEl.textContent = "Gra: " + s.k + " " + s.b + " kbps"; })
+       .catch(function () { failed(s); });
+    }
+  }
+
+  function failed(s) {
+    if (s) s.dead = true;
+    setPlaying(false);
+    stateEl.classList.add("err");
+    stateEl.textContent = "Strumień niedostępny — wybierz inną stację";
+    titleEl.classList.add("dead");
+    render();
+  }
+
+  audio.addEventListener("error", function () { failed(current); });
+  audio.addEventListener("playing", function () {
+    setPlaying(true);
+    if (current) stateEl.textContent = "Gra: " + current.k + " " + current.b + " kbps";
+  });
+  audio.addEventListener("pause", function () { if (!audio.ended) setPlaying(false); });
+  audio.addEventListener("stalled", function () { if (playing) stateEl.textContent = "Buforowanie…"; });
+
+  playBtn.addEventListener("click", function () {
+    if (!current) {
+      var items = visible();
+      if (!items.length) return;
+      playStation(items[Math.floor(Math.random() * items.length)]);
+      return;
+    }
+    if (audio.paused) {
+      stateEl.textContent = "Łączenie…";
+      audio.play().then(function () { setPlaying(true); }).catch(function () { failed(current); });
+    } else {
+      audio.pause();
+      setPlaying(false);
+      stateEl.textContent = "Zatrzymane";
+    }
+  });
+
+  muteBtn.addEventListener("click", function () {
+    muted = !muted;
+    audio.muted = muted;
+    muteBtn.classList.toggle("muted", muted);
+    if (!muted) lastVolume = parseFloat(volEl.value) / 100 || 0.8;
+    audio.volume = muted ? 0 : lastVolume;
+  });
+
+  volEl.addEventListener("input", function () {
+    lastVolume = parseFloat(volEl.value) / 100;
+    muted = false; audio.muted = false;
+    muteBtn.classList.remove("muted");
+    audio.volume = lastVolume;
+  });
+
+  searchEl.addEventListener("input", function () { query = searchEl.value; render(); });
+
+  chipsEl.addEventListener("click", function (ev) {
+    var t = ev.target.closest(".chip");
+    if (t && t.textContent.indexOf("Losowa") === 0) {
+      var items = visible();
+      if (items.length) playStation(items[Math.floor(Math.random() * items.length)]);
+    }
+  });
+
+  /* =====================================================================
+     15. SKRÓTY — flash klawisza + sterowanie makietą
+     ===================================================================== */
+  var mockVisible = false;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (es) { es.forEach(function (e) { mockVisible = e.isIntersecting; }); },
+      { threshold: 0.35 }).observe($("#mock"));
+  } else { mockVisible = true; }
+
+  function flashKey(code) {
+    var el = $$(".key").filter(function (k) { return k.getAttribute("data-key") === code; })[0];
+    if (!el) return false;
+    el.classList.add("flash");
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove("flash"); }, 320);
+    return true;
+  }
+
+  function step(dir) {
+    var items = visible();
+    if (!items.length) return;
+    var i = items.indexOf(current);
+    playStation(items[(i + dir + items.length) % items.length] || items[0]);
+  }
+
+  addEventListener("keydown", function (ev) {
+    /* menu pełnoekranowe ma własną obsługę klawiatury — nie dublujmy skrótów */
+    if (document.documentElement.classList.contains("menu-open")) return;
+    var tag = (ev.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || ev.metaKey || ev.ctrlKey || ev.altKey) {
+      if (ev.key === "Escape" && tag === "input") { searchEl.value = ""; query = ""; render(); searchEl.blur(); }
+      return;
+    }
+
+    var handled = false;
+    if (mockVisible) {
+      if (ev.key === " " || ev.code === "Space") { playBtn.click(); handled = true; }
+      else if (ev.key === "/") { searchEl.focus(); handled = true; }
+      else if (ev.key === "ArrowUp") { step(-1); handled = true; }
+      else if (ev.key === "ArrowDown") { step(1); handled = true; }
+      else if (ev.key.toLowerCase() === "f" && current) {
+        favorites[current.n] = !favorites[current.n];
+        if (!favorites[current.n]) delete favorites[current.n];
+        try { localStorage.setItem("antena-favs", JSON.stringify(favorites)); } catch (e) {}
+        renderChips(); render();
+        showToast(favorites[current.n] ? "Dodano do ulubionych" : "Usunięto z ulubionych");
+        handled = true;
+      }
+      else if (ev.key.toLowerCase() === "m") { muteBtn.click(); handled = true; }
+      else if (ev.key === "Escape") { searchEl.value = ""; query = ""; render(); handled = true; }
+    }
+    var flashed = flashKey(ev.code === "Space" ? " " : ev.key);
+    if (handled || flashed) ev.preventDefault();
+  });
+
+  /* =====================================================================
+     16. POMIAR PŁYNNOŚCI — dobrowolne wyłączenie najdroższych efektów
+     ===================================================================== */
+  var ORDER = ["lite", "mid", "high"];
+  function applyTier(next, remember) {
+    if (next === P.tier || ORDER.indexOf(next) < 0) return;
+    var d = document.documentElement;
+    d.classList.remove("perf-lite", "perf-mid", "perf-high");
+    d.classList.add("perf-" + next);
+    P.tier = next;
+    P.dpr       = next === "lite" ? 1   : next === "mid" ? 1.5 : 2;
+    P.bars      = next === "lite" ? 22  : next === "mid" ? 36  : 52;
+    P.layers    = next === "lite" ? 2   : 3;
+    P.canvasFps = next === "lite" ? 24  : 60;
+    P.mqFps     = next === "lite" ? 30  : 60;
+
+    if (next === "lite") {
+      if (cursorStop) cursorStop();
+      smoothOn = false;
+      d.classList.remove("has-smooth");
+      fx.parallax = fx.tilt = fx.magnet = false;
+      blobs.forEach(function (b) { b.style.transform = ""; });
+      tilts.forEach(function (el) {
+        var st = el.querySelector(".mock-stage") || el;
+        st.style.transform = "";
+      });
+      magnets.forEach(function (el) { el.style.transform = ""; });
+    }
+    if (canvasResize) canvasResize();
+    if (remember) {
+      try {
+        localStorage.setItem("antena-perf", next);
+        localStorage.setItem("antena-perf-ts", String(Date.now()));
+      } catch (e) {}
+    }
+  }
+
+  function probeFps() {
+    if (reduce || P.tier === "lite" || document.hidden) return;
+    var n = 0, t0 = 0, hiddenMs = 0, hidAt = document.hidden ? performance.now() : 0;
+    function onVis() {
+      if (document.hidden) hidAt = performance.now();
+      else if (hidAt) { hiddenMs += performance.now() - hidAt; hidAt = 0; }
+    }
+    document.addEventListener("visibilitychange", onVis);
+    (function tick(ts) {
+      if (!t0) t0 = ts;
+      n++;
+      var ms = ts - t0;
+      if (ms < 3000 && n < 300) { requestAnimationFrame(tick); return; }
+      document.removeEventListener("visibilitychange", onVis);
+      if (document.hidden) return;
+      /* odejmujemy czas, w którym karta była w tle — inaczej słaby komputer
+         wyglądałby tak samo jak karta z wstrzymanym rysowaniem */
+      var dead = hiddenMs + (hidAt ? performance.now() - hidAt : 0);
+      var eff = Math.max(250, ms - dead);
+      if (n < 2) return;
+      var fps = n * 1000 / eff;
+      var i = ORDER.indexOf(P.tier);
+      if (i <= 0) return;
+      if (window.console && console.info) {
+        console.info("[Antena] pomiar " + fps.toFixed(0) + " fps (tryb " + P.tier + ")");
+      }
+      if (fps < 20) applyTier("lite", true);
+      else if (fps < 30) applyTier(ORDER[i - 1], fps < 24);
+    })(performance.now());
+  }
+  setTimeout(probeFps, 5200);
+
+  /* =====================================================================
+     17. START
+     ===================================================================== */
+  renderChips();
+  render();
+  setPlaying(false);
+})();
+</script>
+</body>
+</html>

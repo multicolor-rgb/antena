@@ -1,12 +1,12 @@
 # Buduje Antenę na Linuksa (deb + AppImage) i Windows (instalator .exe, NSIS),
-# a przy wypchnięciu tagu dodatkowo tworzy GitHub Release i dołącza do niego pliki.
+# a następnie tworzy GitHub Release i dołącza do niego zbudowane pliki.
 #
 # Uruchomienie:
 #   - ręcznie:  zakładka "Actions" -> "build" -> "Run workflow"
-#               (buduje i wystawia pliki jako artefakty; wpisz tag w polu
-#                "release_tag", aby dodatkowo utworzyć Release)
+#               (release powstaje automatycznie z tagiem z wersji, np. v1.0.0;
+#                pole "release_tag" pozwala nadpisać ten tag)
 #   - z tagiem: git tag v1.0.0 && git push --tags
-#               (buduje + tworzy release "v1.0.0" z plikami w "Assets")
+#               (release z tego tagu)
 #
 # Projekt nie używa npm/node_modules — "npm" pojawia się tylko po to, żeby pobrać
 # gotowe CLI Tauri (npx). Nie trzeba nic instalować lokalnie.
@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Tag dla Release (np. v1.0.0). Zostaw puste, jeśli chcesz tylko artefakty."
+        description: "Opcjonalny tag dla Release (np. v1.0.0). Puste = tag z wersji w tauri.conf.json."
         required: false
         type: string
   push:
@@ -77,7 +77,7 @@ jobs:
       - name: Build
         run: npx --yes @tauri-apps/cli@^2 build
 
-      # Zawsze dostępne w zakładce uruchomienia (sekcja "Artifacts").
+      # Dodatkowo zawsze dostępne w zakładce uruchomienia (sekcja "Artifacts").
       - name: Wgraj artefakty
         uses: actions/upload-artifact@v4
         with:
@@ -85,17 +85,35 @@ jobs:
           path: ${{ matrix.artifacts }}
           if-no-files-found: error
 
-  # Tworzy release tylko wtedy, gdy workflow ruszył z tagu (np. v1.0.0).
+  # Bez żadnego warunku: jeśli "build" się uda, release zawsze powstaje.
+  # (Jeśli ten job jest "skipped", to znaczy że "build" padł — sprawdź jego log.)
   release:
     name: Release
     needs: build
-    # Release powstaje, gdy: (a) workflow ruszył z tagu, LUB
-    # (b) uruchomiono ręcznie i podano "release_tag".
-    if: startsWith(github.ref, 'refs/tags/') || inputs.release_tag != ''
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+
+      # Kolejność: ręcznie wpisany tag > tag, z którego ruszył workflow > v<wersja>
+      - name: Ustal tag
+        id: t
+        env:
+          INPUT_TAG: ${{ inputs.release_tag }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            tag="$INPUT_TAG"
+          elif [ "$REF_TYPE" = "tag" ]; then
+            tag="$REF_NAME"
+          else
+            tag="v$(python3 -c "import json;print(json.load(open('src-tauri/tauri.conf.json'))['version'])")"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $tag"
+
       - name: Pobierz wszystkie artefakty
         uses: actions/download-artifact@v4
         with:
@@ -108,7 +126,7 @@ jobs:
       - name: Utwórz / zaktualizuj release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          tag_name: ${{ steps.t.outputs.tag }}
           files: dist/**/*
           generate_release_notes: true
           # draft: true   # odkomentuj, jeśli chcesz najpierw przejrzeć release

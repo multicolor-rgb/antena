@@ -63,10 +63,12 @@ Windows → instalator `.exe` (NSIS), macOS → `.dmg`.
 Windowsa można zbudować cross-toolchainem z Linuksa (`cargo-xwin` + LLVM +
 NSIS), ale prościej i bez lokalnych zależności zrobi to GitHub Actions:
 workflow `.github/workflows/build.yml` buduje `deb` + AppImage na Linuksie oraz
-`.exe` na Windowsie. Uruchomienie: zakładka **Actions → build → Run workflow**
-(pliki pojawią się w sekcji **Artifacts** danego uruchomienia). Jeśli chcesz je
-mieć w **Release**, wypchnij tag: `git tag v1.0.0 && git push --tags` — workflow
-zbuduje paczki i utworzy release `v1.0.0`, dołączając pliki do sekcji **Assets**.
+`.exe` na Windowsie. Uruchomienie: zakładka **Actions → build → Run workflow**.
+Pliki pojawiają się w sekcji **Artifacts**, a po udanym buildzie workflow tworzy
+dodatkowo **Release** i dołącza do niego pliki (sekcja **Assets**); tag release
+bierze się z wersji w `tauri.conf.json` (np. `v1.0.0`), a przy wypchnięciu tagu
+(`git tag v1.0.0 && git push --tags`) — z tego tagu. Pole `release_tag` pozwala
+nadpisać tag przy ręcznym uruchomieniu.
 
 macOS trzeba zbudować na macOS (Apple nie udostępnia swojego toolchainu na
 Linuksa); wystarczy dopisać jedną pozycję do macierzy w workflow — komentarz w
