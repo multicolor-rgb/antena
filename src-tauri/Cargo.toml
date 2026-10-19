@@ -6,6 +6,12 @@ authors = ["Antena"]
 edition = "2021"
 rust-version = "1.77"
 
+# Android ładuje aplikację jako bibliotekę (.so), dlatego potrzebujemy
+# również staticlib/cdylib. Desktop nadal korzysta ze zwykłej binarki.
+[lib]
+name = "antena_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
@@ -13,7 +19,9 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 url = "2"
-native-tls = "0.2"
+# Świadomie bez native-tls: na Androidzie wymagałby OpenSSL z NDK.
+# rustls kompiluje się na każdą platformę (Linux, Windows, macOS, Android).
+rustls = { version = "0.23", default-features = false, features = ["std", "ring", "tls12"] }
 
 [profile.release]
 opt-level = "z"

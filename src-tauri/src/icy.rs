@@ -4,8 +4,12 @@
 
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpStream, ToSocketAddrs};
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use rustls::client::danger::{HandshakeSignatureValid, ServerCertVerified, ServerCertVerifier};
+use rustls::pki_types::{CertificateDer, ServerName, UnixTime};
+use rustls::{DigitallySignedStruct, SignatureScheme};
 use serde::Serialize;
 
 const UA: &str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Antena/1.0 Safari/537.36";
@@ -90,14 +94,63 @@ fn open(scheme: &str, host: &str, port: u16, timeout: Duration) -> Option<Box<dy
     tcp.set_nodelay(true).ok()?;
 
     if scheme == "https" {
-        let connector = native_tls::TlsConnector::builder()
-            .danger_accept_invalid_certs(true)
-            .build()
-            .ok()?;
-        let tls = connector.connect(host, tcp).ok()?;
-        Some(Box::new(tls))
+        let provider = Arc::new(rustls::crypto::ring::default_provider());
+        let config = rustls::ClientConfig::builder_with_provider(provider)
+            .with_safe_default_protocol_versions()
+            .ok()?
+            .dangerous()
+            .with_custom_certificate_verifier(Arc::new(AcceptAnyCert))
+            .with_no_client_auth();
+        let server_name = ServerName::try_from(host.to_string()).ok()?;
+        let conn = rustls::ClientConnection::new(Arc::new(config), server_name).ok()?;
+        Some(Box::new(rustls::StreamOwned::new(conn, tcp)))
     } else {
         Some(Box::new(tcp))
+    }
+}
+
+/// Strumienie radiowe dość często mają wygasłe albo niedopasowane certyfikaty,
+/// a my pobieramy wyłącznie tytuł utworu - dlatego świadomie nie weryfikujemy
+/// certyfikatu TLS (tak samo jak wcześniej `danger_accept_invalid_certs(true)`).
+/// Transmisja audio idzie osobnym połączeniem (WebView/GStreamer), więc nie ma
+/// to wpływu na samo odtwarzanie.
+#[derive(Debug)]
+struct AcceptAnyCert;
+
+impl ServerCertVerifier for AcceptAnyCert {
+    fn verify_server_cert(
+        &self,
+        _end_entity: &CertificateDer<'_>,
+        _intermediates: &[CertificateDer<'_>],
+        _server_name: &ServerName<'_>,
+        _ocsp_response: &[u8],
+        _now: UnixTime,
+    ) -> Result<ServerCertVerified, rustls::Error> {
+        Ok(ServerCertVerified::assertion())
+    }
+
+    fn verify_tls12_signature(
+        &self,
+        _message: &[u8],
+        _cert: &CertificateDer<'_>,
+        _dss: &DigitallySignedStruct,
+    ) -> Result<HandshakeSignatureValid, rustls::Error> {
+        Ok(HandshakeSignatureValid::assertion())
+    }
+
+    fn verify_tls13_signature(
+        &self,
+        _message: &[u8],
+        _cert: &CertificateDer<'_>,
+        _dss: &DigitallySignedStruct,
+    ) -> Result<HandshakeSignatureValid, rustls::Error> {
+        Ok(HandshakeSignatureValid::assertion())
+    }
+
+    fn supported_verify_schemes(&self) -> Vec<SignatureScheme> {
+        rustls::crypto::ring::default_provider()
+            .signature_verification_algorithms
+            .supported_schemes()
     }
 }
 

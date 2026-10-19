@@ -1,5 +1,6 @@
-# Buduje Antenę na Linuksa (deb + AppImage) i Windows (instalator .exe, NSIS),
-# a następnie tworzy GitHub Release i dołącza do niego zbudowane pliki.
+# Buduje Antenę na Linuksa (deb + AppImage), Windows (instalator .exe, NSIS)
+# i Androida (uniwersalny APK arm64 + armv7), a następnie tworzy GitHub Release
+# i dołącza do niego zbudowane pliki.
 #
 # Uruchomienie:
 #   - ręcznie:  zakładka "Actions" -> "build" -> "Run workflow"
@@ -10,6 +11,8 @@
 #
 # Projekt nie używa npm/node_modules — "npm" pojawia się tylko po to, żeby pobrać
 # gotowe CLI Tauri (npx). Nie trzeba nic instalować lokalnie.
+# Projekt Android (`src-tauri/gen/android`) jest generowany na runnerze przez
+# `tauri android init` i nie jest wersjonowany.
 #
 # (Chcesz też macOS? Dopisz do macierzy poniżej:
 #    - name: macOS (dmg)
@@ -85,11 +88,88 @@ jobs:
           path: ${{ matrix.artifacts }}
           if-no-files-found: error
 
-  # Bez żadnego warunku: jeśli "build" się uda, release zawsze powstaje.
-  # (Jeśli ten job jest "skipped", to znaczy że "build" padł — sprawdź jego log.)
+  android:
+    name: Android (APK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Java (Temurin)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: NDK r29
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r29
+          local-cache: true
+
+      - name: Rust + cele Android
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi
+
+      - name: Cache (cargo)
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: android
+
+      # Runner ma już ANDROID_HOME; dokładamy tylko platformę/build-tools,
+      # jeśli obraz ich nie zawiera (nie przerywamy, gdy są).
+      - name: Android SDK
+        run: |
+          echo "ANDROID_HOME=${ANDROID_HOME:-brak}"
+          if command -v sdkmanager >/dev/null 2>&1; then
+            SDKMANAGER=sdkmanager
+          else
+            SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          yes | "$SDKMANAGER" --install "platforms;android-37" "build-tools;37.0.0" >/dev/null || true
+
+      - name: Wygeneruj projekt Android
+        env:
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: npx --yes @tauri-apps/cli@^2 android init --ci --skip-targets-install
+
+      # Strumienie po HTTP + podpis debug, żeby APK dał się zainstalować bez sekretów.
+      - name: Patch projektu Android
+        run: python3 scripts/android-patch.py
+
+      - name: Build APK
+        env:
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: npx --yes @tauri-apps/cli@^2 android build --apk --ci --target aarch64 armv7
+
+      - name: Sprawdź i przygotuj APK
+        run: |
+          apk=$(find src-tauri/gen/android/app/build/outputs/apk -type f -name '*.apk' | head -n 1)
+          test -n "$apk"
+          echo "APK: $apk"
+          apksigner=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)
+          "$apksigner" verify --print-certs "$apk"
+          unzip -l "$apk" | grep -q 'lib/arm64-v8a/libantena_lib.so'
+          unzip -l "$apk" | grep -q 'lib/armeabi-v7a/libantena_lib.so'
+          version=$(python3 -c "import json;print(json.load(open('src-tauri/tauri.conf.json'))['version'])")
+          mkdir -p android-dist
+          cp "$apk" "android-dist/antena-${version}-android.apk"
+          ls -l android-dist
+
+      - name: Wgraj artefakt
+        uses: actions/upload-artifact@v4
+        with:
+          name: antena-android
+          path: android-dist/*.apk
+          if-no-files-found: error
+
+  # Bez żadnego warunku: jeśli "build" i "android" się udadzą, release powstaje.
+  # (Jeśli ten job jest "skipped", któryś z poprzednich padł — sprawdź jego log.)
   release:
     name: Release
-    needs: build
+    needs: [build, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
