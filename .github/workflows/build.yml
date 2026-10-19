@@ -108,6 +108,18 @@ jobs:
           ndk-version: r29
           local-cache: true
 
+      # setup-ndk rozpakowuje NDK bez zachowania dowiązań (np. clang -> clang-XX),
+      # przez co cc/ring nie potrafią skompilować kodu C dla Androida.
+      # To samo obejście stosuje CI Tauri.
+      - name: Napraw dowiązania NDK
+        run: |
+          directory="${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          find "$directory" -type l | while read -r link; do
+            current_target=$(readlink "$link")
+            new_target="$directory/$(basename "$current_target")"
+            ln -sf "$new_target" "$link"
+          done
+
       - name: Rust + cele Android
         uses: dtolnay/rust-toolchain@stable
         with:
