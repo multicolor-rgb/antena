@@ -4,8 +4,8 @@
 
 Radio internetowe na Linuksa, Windows i Androida: 252 gotowe stacje, wyszukiwanie,
 gatunki, ulubione, tytuł aktualnie grającego utworu. Interfejs to czysty HTML/CSS/JS
-(bez frameworków, bez bundlera, bez `node_modules`), a warstwa natywna w Rust zajmuje
-się tylko oknem i odczytem metadanych ICY.
+(bez frameworków, bez bundlera, bez zależności JS w aplikacji), a warstwa natywna
+w Rust zajmuje się tylko oknem i odczytem metadanych ICY.
 
 ## Funkcje
 
@@ -87,12 +87,13 @@ uruchomienia.
 Instalacja: zezwól na instalowanie z nieznanych źródeł i stuknij plik albo użyj
 `adb install antena-1.0.0-android.apk`.
 
-Build lokalny (wymaga JDK 17+, Android SDK i NDK):
+Build lokalny (wymaga Node tylko do CLI Tauri, a także JDK 17+, Android SDK i NDK):
 
 ```bash
-npx @tauri-apps/cli@^2 android init --ci --skip-targets-install
+npm ci
+npm run tauri -- android init --ci --skip-targets-install
 python3 scripts/android-patch.py
-npx @tauri-apps/cli@^2 android build --apk --target aarch64 armv7
+npm run tauri -- android build --apk --target aarch64 armv7
 ```
 
 Kilka uwag:
@@ -181,6 +182,7 @@ oznaczy jej nazwę na czerwono i pokaże komunikat w pasku dolnym.
 ```
 antena/
 ├── build.sh, run.sh        # skrypty pomocnicze
+├── package.json            # tylko CLI Tauri do builda Androida (bez zależności frontendu)
 ├── scripts/
 │   └── android-patch.py    # HTTP + podpis debug w generowanym projekcie Android
 ├── .github/workflows/      # build.yml: Linux (deb/AppImage) + Windows (.exe) + Android (APK)

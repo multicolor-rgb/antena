@@ -9,8 +9,9 @@
 #   - z tagiem: git tag v1.0.0 && git push --tags
 #               (release z tego tagu)
 #
-# Projekt nie używa npm/node_modules — "npm" pojawia się tylko po to, żeby pobrać
-# gotowe CLI Tauri (npx). Nie trzeba nic instalować lokalnie.
+# Projekt nie ma zależności JS w aplikacji. `package.json` istnieje tylko po to,
+# żeby zainstalować gotowe CLI Tauri — plugin Gradle Androida wywołuje
+# `npm run tauri` (samo `npx` nie wystarcza, bo nie tworzy node_modules).
 # Projekt Android (`src-tauri/gen/android`) jest generowany na runnerze przez
 # `tauri android init` i nie jest wersjonowany.
 #
@@ -130,10 +131,13 @@ jobs:
           fi
           yes | "$SDKMANAGER" --install "platforms;android-37" "build-tools;37.0.0" >/dev/null || true
 
+      - name: Zależności Node (tylko CLI Tauri)
+        run: npm ci
+
       - name: Wygeneruj projekt Android
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        run: npx --yes @tauri-apps/cli@^2 android init --ci --skip-targets-install
+        run: npm run tauri -- android init --ci --skip-targets-install
 
       # Strumienie po HTTP + podpis debug, żeby APK dał się zainstalować bez sekretów.
       - name: Patch projektu Android
@@ -142,7 +146,7 @@ jobs:
       - name: Build APK
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        run: npx --yes @tauri-apps/cli@^2 android build --apk --ci --target aarch64 armv7
+        run: npm run tauri -- android build --apk --ci --target aarch64 armv7
 
       - name: Sprawdź i przygotuj APK
         run: |

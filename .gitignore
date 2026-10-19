@@ -5,6 +5,9 @@ src-tauri/gen/schemas/
 # Android: projekt generowany przez `tauri android init` (w CI) i w razie potrzeby lokalnie
 src-tauri/gen/android/
 
+# CLI Tauri (package.json służy tylko do jego instalacji; frontend nie ma zależności Node)
+node_modules/
+
 # systemy
 .DS_Store
 *.log

@@ -1,0 +1,12 @@
+{
+  "name": "antena",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lekkie radio internetowe (Tauri) - plik wyłącznie dla CLI Tauri; frontend nie ma zależności Node",
+  "scripts": {
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.3"
+  }
+}
